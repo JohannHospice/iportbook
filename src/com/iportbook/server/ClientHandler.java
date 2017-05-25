@@ -1,25 +1,24 @@
 package com.iportbook.server;
 
-import com.iportbook.app.MyRunnable;
-import com.iportbook.app.message.Message;
+import com.iportbook.app.net.udp.DatagramSocketSender;
+import com.iportbook.app.net.tcp.SocketHandler;
+import com.iportbook.app.tools.MyRunnable;
+import com.iportbook.app.tools.Message;
 import com.iportbook.app.modele.Client;
-import com.iportbook.app.tcp.SocketHandler;
-import com.iportbook.app.udp.DatagramSocketSender;
-
 import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler extends MyRunnable {
-    private final Server server;
+    private final AppServer appServer;
     private int port;
     private SocketHandler soHandler;
     private DatagramSocketSender notifier;
     private Client client;
 
-    public ClientHandler(Server server, Socket socket) throws IOException {
+    public ClientHandler(AppServer appServer, Socket socket) throws IOException {
         this.soHandler = new SocketHandler(socket);
         port = socket.getPort();
-        this.server = server;
+        this.appServer = appServer;
     }
 
     @Override
@@ -32,7 +31,7 @@ public class ClientHandler extends MyRunnable {
                 case HELLO:
                     id = message.getArgument(0);
                     password = message.getArgument(1);
-                    client = server.getClient(id, password);
+                    client = appServer.getClient(id, password);
                     break;
                 case REGIS:
                     id = message.getArgument(0);
@@ -68,7 +67,7 @@ public class ClientHandler extends MyRunnable {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        server.removeClientHandler(this);
+        appServer.removeClientHandler(this);
     }
 
 }

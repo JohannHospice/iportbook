@@ -1,4 +1,4 @@
-package com.iportbook.app.udp;
+package com.iportbook.app.net.udp;
 
 import java.io.IOException;
 import java.net.*;

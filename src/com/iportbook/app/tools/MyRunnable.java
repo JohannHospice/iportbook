@@ -1,4 +1,4 @@
-package com.iportbook.app;
+package com.iportbook.app.tools;
 
 import java.util.logging.Logger;
 
@@ -20,9 +20,9 @@ public abstract class MyRunnable implements Runnable {
         run = false;
     }
 
+    protected abstract void onStart();
+
     protected abstract void onLoop();
 
     protected abstract void onEnd();
-
-    protected abstract void onStart();
 }

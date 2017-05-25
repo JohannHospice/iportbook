@@ -1,4 +1,4 @@
-package com.iportbook.app.tcp;
+package com.iportbook.app.net.tcp;
 
 import java.io.*;
 import java.net.Socket;
