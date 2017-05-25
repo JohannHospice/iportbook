@@ -1,4 +1,4 @@
-import com.iportbook.app.message.Message;
+import com.iportbook.app.tools.Message;
 import junit.framework.TestCase;
 
 public class MessageTest extends TestCase {
@@ -13,8 +13,8 @@ public class MessageTest extends TestCase {
     public void testParse() throws Exception {
         Message message = Message.parse(tests[0]);
 
-        assertEquals("REGIS", message.getType());
-        assertEquals("", message.getOperator());
+        assertEquals(Message.Type.REGIS, message.getType());
+        assertEquals(Message.Operator.NONE, message.getOperator());
         assertEquals("bob12345", message.getArgument(0));
         assertEquals("07878", message.getArgument(1));
         assertEquals("1010", message.getArgument(2));

@@ -73,9 +73,14 @@ public class Message {
 
         while (matcher.find()) {
 
-            Type type = Type.hasType(matcher.group(0));
-            Operator operator = Operator.hasType(matcher.group(1));
-            String[] args = matcher.group(2).split(" ");
+            String typeFounded = matcher.group(1);
+            Type type = Type.hasType(typeFounded);
+
+            String operatorFounded = matcher.group(2);
+            Operator operator = Operator.hasType(operatorFounded);
+
+            String argsFounded = matcher.group(3);
+            String[] args = argsFounded.substring(1).split(" ");
 
             if (type == null || operator == null)
                 throw new Exception("message not valid");

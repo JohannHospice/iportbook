@@ -1,4 +1,4 @@
-import com.iportbook.app.tcp.SocketHandler;
+import com.iportbook.app.net.tcp.SocketHandler;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -7,12 +7,12 @@ import java.io.IOException;
  * Created by djihe on 13/05/2017.
  */
 public class SocketHandlerTest extends TestCase {
-    SocketHandler socketHandler;
+    private SocketHandler socketHandler;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        socketHandler = new SocketHandler("localhost", 6666);
+        socketHandler = new SocketHandler("localhost", 8080);
     }
 
     @Override
