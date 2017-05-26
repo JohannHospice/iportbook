@@ -1,30 +1,60 @@
-import com.iportbook.app.net.tcp.SocketHandler;
+import com.iportbook.core.tools.net.SocketHandler;
 import junit.framework.TestCase;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-/**
- * Created by djihe on 13/05/2017.
- */
 public class SocketHandlerTest extends TestCase {
-    private SocketHandler socketHandler;
+    private ServerSocket server;
+    private final static int PORT = 9999;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        socketHandler = new SocketHandler("localhost", 8080);
+        server = new ServerSocket(PORT);
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        socketHandler.close();
+        server.close();
     }
 
-    public void testSendReceive() throws IOException {
-        String send = "Salut";
-        socketHandler.send(send);
-        String receive = socketHandler.receive();
-        assertEquals(send, receive);
+    public void testSend() throws IOException {
+        SocketHandler socketHandler = new SocketHandler("localhost", PORT);
+
+        Socket so = server.accept();
+        BufferedReader br = new BufferedReader(new InputStreamReader(so.getInputStream()));
+
+        String msgSend = "Salut";
+        socketHandler.send(msgSend);
+
+        String msgReceive = br.readLine();
+
+        br.close();
+        so.close();
+        socketHandler.close();
+
+        assertEquals(msgSend, msgReceive);
+    }
+
+    public void testReceive() throws IOException {
+        SocketHandler socketHandler = new SocketHandler("localhost", PORT);
+
+        Socket so = server.accept();
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(so.getOutputStream()));
+        String msgSend = "Salut";
+
+        pw.print(msgSend+'\n');
+        pw.flush();
+
+        String msgReceive = socketHandler.receive();
+
+        pw.close();
+        so.close();
+        socketHandler.close();
+
+        assertEquals(msgSend, msgReceive);
     }
 }

@@ -1,4 +1,4 @@
-package com.iportbook.app.modele;
+package com.iportbook.core.modele;
 
 import java.util.ArrayList;
 

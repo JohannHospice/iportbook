@@ -1,4 +1,4 @@
-package com.iportbook.app.tools;
+package com.iportbook.core.tools.composed;
 
 public class ComposedTextById extends ComposedText {
     public String id;

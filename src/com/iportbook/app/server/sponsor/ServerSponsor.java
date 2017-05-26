@@ -1,6 +1,6 @@
-package com.iportbook.server;
+package com.iportbook.app.server.sponsor;
 
-import com.iportbook.app.tools.ApplicationListener;
+import com.iportbook.core.tools.ApplicationListener;
 
 public class ServerSponsor extends ApplicationListener {
     public ServerSponsor(int port) {

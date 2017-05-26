@@ -1,4 +1,4 @@
-package com.iportbook.app.tools;
+package com.iportbook.core.tools.message;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,13 +115,14 @@ public class Message {
             String operatorFounded = matcher.group(2);
             Operator operator = Operator.hasType(operatorFounded);
 
-            String argsFounded = matcher.group(3);
-            String[] args = argsFounded.substring(1).split(" ");
-
             if (type == null || operator == null)
                 throw new MessageParseException();
 
-            message = new Message(type, operator, args);
+            String argsFounded = matcher.group(3);
+
+            message = argsFounded.length() > 0 ?
+                    new Message(type, operator, argsFounded.substring(1).split(" ")) :
+                    new Message(type, operator);
         }
 
         return message;
@@ -132,5 +133,10 @@ public class Message {
         for (String str : arguments)
             concat.append(" ").append(str);
         return type.value + operator.value + concat.toString() + "+++";
+    }
+
+    @Override
+    public String toString() {
+        return compose();
     }
 }

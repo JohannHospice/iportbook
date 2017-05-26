@@ -1,6 +1,6 @@
-package com.iportbook.app.net.tcp;
+package com.iportbook.core.tools.net;
 
-import com.iportbook.app.tools.Message;
+import com.iportbook.core.tools.message.Message;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,7 +8,7 @@ import java.net.Socket;
 public class SocketHandler {
     private final Socket socket;
     private BufferedReader br;
-    private PrintWriter pw;
+    private BufferedWriter bw;
 
     public SocketHandler(String host, int port) throws IOException {
         this.socket = new Socket(host, port);
@@ -19,8 +19,8 @@ public class SocketHandler {
     }
 
     public void send(String text) throws IOException {
-        getPw().print(text);
-        getPw().flush();
+        getBw().write(text + '\n');
+        getBw().flush();
     }
 
     public String receive() throws IOException {
@@ -36,8 +36,8 @@ public class SocketHandler {
     }
 
     public void close() throws IOException {
-        if (pw != null)
-            pw.close();
+        if (bw != null)
+            bw.close();
         if (br != null)
             br.close();
         socket.close();
@@ -53,9 +53,9 @@ public class SocketHandler {
         return br;
     }
 
-    private PrintWriter getPw() throws IOException {
-        if (pw == null)
-            this.pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-        return pw;
+    private BufferedWriter getBw() throws IOException {
+        if (bw == null)
+            this.bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        return bw;
     }
 }

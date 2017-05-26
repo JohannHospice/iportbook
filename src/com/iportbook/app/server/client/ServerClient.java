@@ -1,11 +1,10 @@
-package com.iportbook.server;
+package com.iportbook.app.server.client;
 
-import com.iportbook.app.ClientManager;
-import com.iportbook.app.modele.Client;
-import com.iportbook.app.net.udp.DatagramSocketSender;
-import com.iportbook.app.tools.ApplicationListener;
-import com.iportbook.app.tools.ComposedText;
-import com.sun.org.apache.bcel.internal.generic.LOOKUPSWITCH;
+import com.iportbook.core.tools.ClientManager;
+import com.iportbook.core.modele.Client;
+import com.iportbook.core.tools.net.DatagramSocketSender;
+import com.iportbook.core.tools.ApplicationListener;
+import com.iportbook.core.tools.composed.ComposedText;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,6 +16,7 @@ public class ServerClient extends ApplicationListener {
     private ArrayList<ClientHandler> cliHandlers = new ArrayList<>();
     ClientManager cliManager = new ClientManager("clients");
     private int port;
+
     public ServerClient(int port) {
         this.port = port;
     }
@@ -77,4 +77,5 @@ public class ServerClient extends ApplicationListener {
     public void addClient(Client client) throws ClientException {
         cliManager.addClient(client);
     }
+
 }

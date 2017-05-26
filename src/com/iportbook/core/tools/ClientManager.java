@@ -1,8 +1,8 @@
-package com.iportbook.app;
+package com.iportbook.core.tools;
 
-import com.iportbook.app.modele.Client;
-import com.iportbook.app.tools.Serializer;
-import com.iportbook.server.ClientException;
+import com.iportbook.app.server.client.ClientException;
+import com.iportbook.core.modele.Client;
+import com.iportbook.core.tools.io.Serializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ public class ClientManager {
     public boolean hasClientById(String id) {
         boolean hasClient = false;
         Iterator<Client> iter = clients.iterator();
-        boolean hasNext = iter.hasNext();
         while (!hasClient && iter.hasNext()) {
             Client next = iter.next();
             if (Objects.equals(next.getId(), id))

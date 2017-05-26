@@ -1,12 +1,13 @@
-package com.iportbook.client;
+package com.iportbook.app.client;
 
-import com.iportbook.app.modele.Client;
-import com.iportbook.app.tools.ApplicationListener;
+import com.iportbook.core.modele.Client;
+import com.iportbook.core.tools.ApplicationListener;
 
 public class AppClient extends ApplicationListener {
     private final int port;
     private Client client;
-    public AppClient(int port){
+
+    public AppClient(int port) {
         this.port = port;
     }
 

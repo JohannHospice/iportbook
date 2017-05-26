@@ -1,8 +1,5 @@
-package com.iportbook.server;
+package com.iportbook.app.server.client;
 
-/**
- * Created by djihe on 25/05/2017.
- */
 public class ClientException extends Exception {
     public ClientException(String s) {
         super(s);

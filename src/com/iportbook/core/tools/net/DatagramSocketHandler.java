@@ -1,7 +1,8 @@
-package com.iportbook.app.net.udp;
+package com.iportbook.core.tools.net;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 public class DatagramSocketHandler {
     private DatagramSocketReceiver receiver;

@@ -1,6 +1,5 @@
-package com.iportbook.app.tools;
+package com.iportbook.core.tools;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 public abstract class ApplicationListener implements Runnable {
@@ -26,7 +25,7 @@ public abstract class ApplicationListener implements Runnable {
 
     protected abstract void onStart() throws Exception;
 
-    protected abstract void onLoop()throws Exception;
+    protected abstract void onLoop() throws Exception;
 
-    protected abstract void onEnd()throws Exception;
+    protected abstract void onEnd() throws Exception;
 }

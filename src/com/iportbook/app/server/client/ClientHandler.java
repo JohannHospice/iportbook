@@ -1,17 +1,17 @@
-package com.iportbook.server;
+package com.iportbook.app.server.client;
 
-import com.iportbook.app.net.tcp.SocketHandler;
-import com.iportbook.app.tools.ApplicationListener;
-import com.iportbook.app.tools.ComposedText;
-import com.iportbook.app.tools.ComposedTextById;
-import com.iportbook.app.tools.Message;
-import com.iportbook.app.modele.Client;
+import com.iportbook.core.modele.Client;
+import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.ApplicationListener;
+import com.iportbook.core.tools.composed.ComposedText;
+import com.iportbook.core.tools.composed.ComposedTextById;
+import com.iportbook.core.tools.message.Message;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 
-import static com.iportbook.app.tools.Message.Type.*;
+import static com.iportbook.core.tools.message.Message.Type.MESS;
 
 public class ClientHandler extends ApplicationListener {
     private Client client;
@@ -28,6 +28,7 @@ public class ClientHandler extends ApplicationListener {
     protected void onStart() {
         try {
             Message message = soHandler.receiveMessage();
+            LOGGER.info("received message: " + message);
             switch (message.getType()) {
                 case CONNE:
                     client = serverClient.cliManager.getClient(
@@ -53,9 +54,9 @@ public class ClientHandler extends ApplicationListener {
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
+            stop();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
             stop();
         }
     }
@@ -64,6 +65,7 @@ public class ClientHandler extends ApplicationListener {
     protected void onLoop() {
         try {
             Message message = soHandler.receiveMessage();
+            LOGGER.info("receiveby/" + client.getId() + ": " + message);
             switch (message.getType()) {
                 case FRIE:
                     if (message.getOperator() == Message.Operator.ASK) {

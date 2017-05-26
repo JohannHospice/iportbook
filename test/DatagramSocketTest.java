@@ -1,4 +1,4 @@
-import com.iportbook.app.net.udp.DatagramSocketHandler;
+import com.iportbook.core.tools.net.DatagramSocketHandler;
 import junit.framework.TestCase;
 
 public class DatagramSocketTest extends TestCase {
