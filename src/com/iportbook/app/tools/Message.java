@@ -11,7 +11,7 @@ public class Message {
         REGIS("REGIS"), WELCO("WELCO"), GOBYE("GOBYE"), CONNE("CONNE"), HELLO("HELLO"), FRIE("FRIE"), MENUM("MENUM"),
         MESS("MESS"), FLOO("FLOO"), LIST("LIST"), RLIST("RLIST"), LINUM("LINUM"), CONSU("CONSU"), SSEM("SSEM"),
         MUNEM("MUNEM"), OOLF("OOLF"), EIRF("EIRF"), OKIRF("OKIRF"), NOKRF("NOKRF"), ACKRF("ACKRF"), FRIEN("FRIEN"),
-        NOFRI("NOFRI"), LBUP("LBUP"), NOCON("NOCON"), PUBL("PUBL");
+        NOFRI("NOFRI"), LBUP("LBUP"), NOCON("NOCON"), PUBL("PUBL"), IQUIT("IQUIT");
 
         private final String value;
 
@@ -57,6 +57,11 @@ public class Message {
     private final static String regex = "^([A-Z]+)([\\?><]?)((\\s[a-zA-Z0-9]+)*)?\\+\\+\\+$";
     private final static Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
 
+    public Message(Type type) {
+        this.type = type;
+        this.operator = Operator.NONE;
+    }
+
     public Message(Type type, Operator operator) {
         this.type = type;
         this.operator = operator;
@@ -65,41 +70,6 @@ public class Message {
     public Message(Type type, Operator operator, String[] args) {
         this(type, operator);
         this.arguments.addAll(Arrays.asList(args));
-    }
-
-    public static Message parse(String text) throws Exception {
-        Message message = null;
-        Matcher matcher = pattern.matcher(text);
-
-        while (matcher.find()) {
-
-            String typeFounded = matcher.group(1);
-            Type type = Type.hasType(typeFounded);
-
-            String operatorFounded = matcher.group(2);
-            Operator operator = Operator.hasType(operatorFounded);
-
-            String argsFounded = matcher.group(3);
-            String[] args = argsFounded.substring(1).split(" ");
-
-            if (type == null || operator == null)
-                throw new Exception("message not valid");
-
-            message = new Message(type, operator, args);
-        }
-
-        return message;
-    }
-
-    public String compose() {
-        StringBuilder concat = new StringBuilder();
-        for (String str : arguments)
-            concat.append(" ").append(str);
-        return type.value + operator.value + concat.toString() + "+++";
-    }
-
-    public void addArgument(String arg) {
-        arguments.add(arg);
     }
 
     public String getArgument(int i) {
@@ -118,12 +88,49 @@ public class Message {
         return type;
     }
 
-
-    public void setType(Type type) {
-        this.type = type;
+    public Message addArgument(String arg) {
+        arguments.add(arg);
+        return this;
     }
 
-    public void setOperator(Operator operator) {
+    public Message setType(Type type) {
+        this.type = type;
+        return this;
+    }
+
+    public Message setOperator(Operator operator) {
         this.operator = operator;
+        return this;
+    }
+
+    public static Message parse(String text) throws MessageParseException {
+        Message message = null;
+        Matcher matcher = pattern.matcher(text);
+
+        while (matcher.find()) {
+
+            String typeFounded = matcher.group(1);
+            Type type = Type.hasType(typeFounded);
+
+            String operatorFounded = matcher.group(2);
+            Operator operator = Operator.hasType(operatorFounded);
+
+            String argsFounded = matcher.group(3);
+            String[] args = argsFounded.substring(1).split(" ");
+
+            if (type == null || operator == null)
+                throw new MessageParseException();
+
+            message = new Message(type, operator, args);
+        }
+
+        return message;
+    }
+
+    public String compose() {
+        StringBuilder concat = new StringBuilder();
+        for (String str : arguments)
+            concat.append(" ").append(str);
+        return type.value + operator.value + concat.toString() + "+++";
     }
 }

@@ -1,61 +1,121 @@
 package com.iportbook.server;
 
-import com.iportbook.app.net.udp.DatagramSocketSender;
 import com.iportbook.app.net.tcp.SocketHandler;
-import com.iportbook.app.tools.MyRunnable;
+import com.iportbook.app.tools.ApplicationListener;
+import com.iportbook.app.tools.ComposedText;
+import com.iportbook.app.tools.ComposedTextById;
 import com.iportbook.app.tools.Message;
 import com.iportbook.app.modele.Client;
+
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
 
-public class ClientHandler extends MyRunnable {
-    private final AppServer appServer;
-    private int port;
-    private SocketHandler soHandler;
-    private DatagramSocketSender notifier;
+import static com.iportbook.app.tools.Message.Type.*;
+
+public class ClientHandler extends ApplicationListener {
     private Client client;
+    private final ServerClient serverClient;
+    private final SocketHandler soHandler;
+    private HashMap<Message.Type, ComposedText> composedTextHashMap = new HashMap<>();
 
-    public ClientHandler(AppServer appServer, Socket socket) throws IOException {
+    ClientHandler(ServerClient serverClient, Socket socket) throws IOException {
+        this.serverClient = serverClient;
         this.soHandler = new SocketHandler(socket);
-        port = socket.getPort();
-        this.appServer = appServer;
     }
 
     @Override
     protected void onStart() {
         try {
-            Message message = Message.parse(soHandler.receive());
-            String id;
-            String password;
+            Message message = soHandler.receiveMessage();
             switch (message.getType()) {
-                case HELLO:
-                    id = message.getArgument(0);
-                    password = message.getArgument(1);
-                    client = appServer.getClient(id, password);
+                case CONNE:
+                    client = serverClient.cliManager.getClient(
+                            message.getArgument(0),
+                            message.getArgument(1));
+                    soHandler.sendMessage(new Message(Message.Type.HELLO));
                     break;
                 case REGIS:
-                    id = message.getArgument(0);
-                    String port = message.getArgument(1);
-                    password = message.getArgument(2);
-                    client = new Client(id, password, Integer.parseInt(port));
+                    client = new Client(
+                            message.getArgument(0),
+                            message.getArgument(2),
+                            Integer.parseInt(message.getArgument(1)));
+                    serverClient.cliManager.addClient(client);
+                    soHandler.sendMessage(new Message(Message.Type.WELCO));
                     break;
                 default:
                     stop();
                     break;
             }
-            //login or register
-            //notifier = new DatagramSocketSender();
+        } catch (ClientException e) {
+            try {
+                soHandler.sendMessage(new Message(Message.Type.GOBYE));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         } catch (Exception e) {
-            stop();
             e.printStackTrace();
+        } finally {
+            stop();
         }
     }
 
     @Override
     protected void onLoop() {
         try {
-            soHandler.receive();
-        } catch (IOException e) {
+            Message message = soHandler.receiveMessage();
+            switch (message.getType()) {
+                case FRIE:
+                    if (message.getOperator() == Message.Operator.ASK) {
+                        String id = message.getArgument(0);
+                        if (serverClient.cliManager.hasClientById(id)) {
+                            soHandler.sendMessage(new Message(Message.Type.FRIE, Message.Operator.CRIGHT));
+                        } else {
+                            soHandler.sendMessage(new Message(Message.Type.FRIE, Message.Operator.CLEFT));
+                        }
+                    }
+                    break;
+                case MENUM:
+                    if (composedTextHashMap.containsKey(MESS)) {
+                        ComposedTextById myComposedTextById = (ComposedTextById) this.composedTextHashMap.get(MESS);
+                        int num = Integer.parseInt(message.getArgument(0));
+                        String mess = message.getArgument(1);
+                        myComposedTextById.message.set(num, mess);
+                        if (num >= myComposedTextById.size - 1) {
+                            serverClient.notify(myComposedTextById.id, myComposedTextById);
+                        }
+                    }
+                    break;
+                case MESS:
+                    if (message.getOperator() == Message.Operator.ASK) {
+                        String id = message.getArgument(0);
+                        String numMess = message.getArgument(1);
+                        if (serverClient.cliManager.hasClientById(id)) {
+                            ComposedTextById composedTextById = new ComposedTextById(id, Integer.parseInt(numMess));
+                            composedTextHashMap.put(MESS, composedTextById);
+                        }
+                    }
+                    break;
+                case FLOO:
+                    break;
+                case LIST:
+                    if (message.getOperator() == Message.Operator.ASK) {
+                        int size = serverClient.cliManager.size();
+                        soHandler.sendMessage(new Message(Message.Type.RLIST).addArgument(String.valueOf(size)));
+                        for (int i = 0; i < size; i++) {
+                            Client client1 = serverClient.cliManager.get(i);
+                            soHandler.sendMessage(new Message(Message.Type.LINUM).addArgument(client1.getId()));
+                        }
+                    }
+                    break;
+                case CONSU:
+                    break;
+                case IQUIT:
+                    soHandler.sendMessage(new Message(Message.Type.GOBYE));
+                    stop();
+                    break;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -67,7 +127,7 @@ public class ClientHandler extends MyRunnable {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        appServer.removeClientHandler(this);
+        serverClient.removeClientHandler(this);
     }
 
 }

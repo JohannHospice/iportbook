@@ -1,9 +1,9 @@
 package com.iportbook.client;
 
 import com.iportbook.app.modele.Client;
-import com.iportbook.app.tools.MyRunnable;
+import com.iportbook.app.tools.ApplicationListener;
 
-public class AppClient extends MyRunnable {
+public class AppClient extends ApplicationListener {
     private final int port;
     private Client client;
     public AppClient(int port){

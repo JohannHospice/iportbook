@@ -1,5 +1,7 @@
 package com.iportbook.app.net.tcp;
 
+import com.iportbook.app.tools.Message;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -23,6 +25,14 @@ public class SocketHandler {
 
     public String receive() throws IOException {
         return getBr().readLine();
+    }
+
+    public Message receiveMessage() throws Exception {
+        return Message.parse(receive());
+    }
+
+    public void sendMessage(Message message) throws Exception {
+        send(message.compose());
     }
 
     public void close() throws IOException {

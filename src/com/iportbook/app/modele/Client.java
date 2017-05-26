@@ -1,9 +1,12 @@
 package com.iportbook.app.modele;
 
+import java.util.ArrayList;
+
 public class Client {
     private String id;
     private String password;
     private int port;
+    private ArrayList<String> friendsId = new ArrayList<>();
 
     public Client(String id, String password, int port) {
         this.id = id;
@@ -35,4 +38,15 @@ public class Client {
         this.port = port;
     }
 
+    public ArrayList<String> getFriendsId() {
+        return friendsId;
+    }
+
+    public void addFriendsId(String id) {
+        friendsId.add(id);
+    }
+
+    public void setFriendsId(ArrayList<String> friendsId) {
+        this.friendsId = friendsId;
+    }
 }

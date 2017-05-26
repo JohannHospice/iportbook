@@ -9,11 +9,8 @@ public class DatagramSocketSender {
     private DatagramSocket dso;
 
     /**
-     *
      * @param targetPort int
-     * @param host string
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @param host       string
      */
     public DatagramSocketSender(int targetPort, String host) throws UnknownHostException, SocketException {
         this.targetPort = targetPort;
@@ -23,9 +20,8 @@ public class DatagramSocketSender {
 
     /**
      * with no host given it use localhost
+     *
      * @param targetPort int
-     * @throws UnknownHostException
-     * @throws SocketException
      */
     public DatagramSocketSender(int targetPort) throws UnknownHostException, SocketException {
         this.targetPort = targetPort;
@@ -35,7 +31,11 @@ public class DatagramSocketSender {
 
     public void send(String text) throws IOException {
         byte[] data = text.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, targetPort);
-        dso.send(packet);
+        dso.send(new DatagramPacket(data, data.length, address, targetPort));
     }
+
+    public void close() {
+        dso.close();
+    }
+
 }
