@@ -1,6 +1,6 @@
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.tools.net.SocketHandler;
-import com.iportbook.core.tools.message.Message;
+import com.iportbook.core.tools.message.MessageTCP;
 import com.iportbook.app.server.client.ServerClient;
 import junit.framework.TestCase;
 
@@ -15,7 +15,7 @@ public class ServerClientTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         serverClient = new ServerClient(PORTSERVER);
-        serverClient.addClient(new Client("bachata", "bachata", 8885));
+        serverClient.getClientManager().addClient(new Client("bachata", "bachata", 8885));
         new Thread(serverClient).start();
 
         TimeUnit.SECONDS.sleep(2);
@@ -32,37 +32,37 @@ public class ServerClientTest extends TestCase {
 
         SocketHandler so = new SocketHandler("localhost", PORTSERVER);
 
-        so.sendMessage(new Message(Message.Type.REGIS)
+        so.sendMessage(new MessageTCP(MessageTCP.Type.REGIS)
                 .addArgument(id)
                 .addArgument(port)
                 .addArgument(mdp));
-        Message.Type typeCo = so.receiveMessage().getType();
+        MessageTCP.Type typeCo = so.receiveMessage().getType();
 
-        so.sendMessage(new Message(Message.Type.IQUIT));
-        Message.Type typeQu = so.receiveMessage().getType();
+        so.sendMessage(new MessageTCP(MessageTCP.Type.IQUIT));
+        MessageTCP.Type typeQu = so.receiveMessage().getType();
         so.close();
 
-        Client client = serverClient.getClientById(id);
+        Client client = serverClient.getClientManager().getClient(id);
 
 
-        assertEquals(Message.Type.WELCO, typeCo);
-        assertEquals(Message.Type.GOBYE, typeQu);
+        assertEquals(MessageTCP.Type.WELCO, typeCo);
+        assertEquals(MessageTCP.Type.GOBYE, typeQu);
         assertEquals(id, client.getId());
-        assertEquals(Integer.parseInt(port), client.getPort());
+        assertEquals(Integer.parseInt(port), client.getPortUDP());
         assertEquals(mdp, client.getPassword());
     }
 
     public void testLogin() throws Exception {
         SocketHandler so = new SocketHandler("localhost", PORTSERVER);
-        so.sendMessage(new Message(Message.Type.CONNE)
+        so.sendMessage(new MessageTCP(MessageTCP.Type.CONNE)
                 .addArgument("bachata")
                 .addArgument("bachata"));
-        Message.Type typeCo = so.receiveMessage().getType();
-        so.sendMessage(new Message(Message.Type.IQUIT));
-        Message.Type typeQu = so.receiveMessage().getType();
+        MessageTCP.Type typeCo = so.receiveMessage().getType();
+        so.sendMessage(new MessageTCP(MessageTCP.Type.IQUIT));
+        MessageTCP.Type typeQu = so.receiveMessage().getType();
         so.close();
 
-        assertEquals(Message.Type.HELLO, typeCo);
-        assertEquals(Message.Type.GOBYE, typeQu);
+        assertEquals(MessageTCP.Type.HELLO, typeCo);
+        assertEquals(MessageTCP.Type.GOBYE, typeQu);
     }
 }

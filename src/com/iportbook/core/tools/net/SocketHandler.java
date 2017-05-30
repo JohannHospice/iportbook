@@ -1,6 +1,6 @@
 package com.iportbook.core.tools.net;
 
-import com.iportbook.core.tools.message.Message;
+import com.iportbook.core.tools.message.MessageTCP;
 
 import java.io.*;
 import java.net.Socket;
@@ -27,11 +27,11 @@ public class SocketHandler {
         return getBr().readLine();
     }
 
-    public Message receiveMessage() throws Exception {
-        return Message.parse(receive());
+    public MessageTCP receiveMessage() throws Exception {
+        return MessageTCP.parse(receive());
     }
 
-    public void sendMessage(Message message) throws Exception {
+    public void sendMessage(MessageTCP message) throws Exception {
         send(message.compose());
     }
 

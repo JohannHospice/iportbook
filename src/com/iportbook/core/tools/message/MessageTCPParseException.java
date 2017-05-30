@@ -1,7 +1,7 @@
 package com.iportbook.core.tools.message;
 
-class MessageParseException extends Exception {
-    MessageParseException() {
+class MessageTCPParseException extends Exception {
+    MessageTCPParseException() {
         super("error while parsing a string to message");
     }
 }

@@ -34,6 +34,10 @@ public class DatagramSocketSender {
         dso.send(new DatagramPacket(data, data.length, address, targetPort));
     }
 
+    public void send(byte[] data) throws IOException {
+        dso.send(new DatagramPacket(data, data.length, address, targetPort));
+    }
+
     public void close() {
         dso.close();
     }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Message {
+public class MessageTCP {
 
     public enum Type {
         REGIS("REGIS"), WELCO("WELCO"), GOBYE("GOBYE"), CONNE("CONNE"), HELLO("HELLO"), FRIE("FRIE"), MENUM("MENUM"),
@@ -57,17 +57,17 @@ public class Message {
     private final static String regex = "^([A-Z]+)([\\?><]?)((\\s[a-zA-Z0-9]+)*)?\\+\\+\\+$";
     private final static Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
 
-    public Message(Type type) {
+    public MessageTCP(Type type) {
         this.type = type;
         this.operator = Operator.NONE;
     }
 
-    public Message(Type type, Operator operator) {
+    public MessageTCP(Type type, Operator operator) {
         this.type = type;
         this.operator = operator;
     }
 
-    public Message(Type type, Operator operator, String[] args) {
+    public MessageTCP(Type type, Operator operator, String[] args) {
         this(type, operator);
         this.arguments.addAll(Arrays.asList(args));
     }
@@ -88,23 +88,23 @@ public class Message {
         return type;
     }
 
-    public Message addArgument(String arg) {
+    public MessageTCP addArgument(String arg) {
         arguments.add(arg);
         return this;
     }
 
-    public Message setType(Type type) {
+    public MessageTCP setType(Type type) {
         this.type = type;
         return this;
     }
 
-    public Message setOperator(Operator operator) {
+    public MessageTCP setOperator(Operator operator) {
         this.operator = operator;
         return this;
     }
 
-    public static Message parse(String text) throws MessageParseException {
-        Message message = null;
+    public static MessageTCP parse(String text) throws MessageTCPParseException {
+        MessageTCP message = null;
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
@@ -116,13 +116,13 @@ public class Message {
             Operator operator = Operator.hasType(operatorFounded);
 
             if (type == null || operator == null)
-                throw new MessageParseException();
+                throw new MessageTCPParseException();
 
             String argsFounded = matcher.group(3);
 
             message = argsFounded.length() > 0 ?
-                    new Message(type, operator, argsFounded.substring(1).split(" ")) :
-                    new Message(type, operator);
+                    new MessageTCP(type, operator, argsFounded.substring(1).split(" ")) :
+                    new MessageTCP(type, operator);
         }
 
         return message;

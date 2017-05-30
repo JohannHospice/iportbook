@@ -4,14 +4,15 @@ import java.util.ArrayList;
 
 public class Client {
     private String id;
-    private String password;
-    private int port;
+    private int password;
+    private int portUDP;
     private ArrayList<String> friendsId = new ArrayList<>();
+    private ArrayList<Flux> flux = new ArrayList<>();
 
-    public Client(String id, String password, int port) {
+    public Client(String id, int password, int portUDP) {
         this.id = id;
         this.password = password;
-        this.port = port;
+        this.portUDP = portUDP;
     }
 
     public String getId() {
@@ -22,20 +23,20 @@ public class Client {
         this.id = id;
     }
 
-    public String getPassword() {
+    public int getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(int password) {
         this.password = password;
     }
 
-    public int getPort() {
-        return port;
+    public int getPortUDP() {
+        return portUDP;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setPortUDP(int portUDP) {
+        this.portUDP = portUDP;
     }
 
     public ArrayList<String> getFriendsId() {
@@ -48,5 +49,17 @@ public class Client {
 
     public void setFriendsId(ArrayList<String> friendsId) {
         this.friendsId = friendsId;
+    }
+
+    public Flux getFlux(int i) {
+        return flux.get(i);
+    }
+
+    public void addFlux(Flux message) {
+        this.flux.add(message);
+    }
+
+    public int getFluxSize() {
+        return flux.size();
     }
 }
