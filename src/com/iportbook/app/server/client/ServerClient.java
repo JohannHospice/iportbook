@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 
 public class ServerClient extends ApplicationListener {
     private ServerSocket serverSocket;
-    private ClientManager cliManager = new ClientManager("clients");
+    private ClientManager cliManager = new ClientManager("clients.bin");
     private int port;
 
     public ServerClient(int port) {
@@ -18,7 +18,12 @@ public class ServerClient extends ApplicationListener {
     @Override
     public void onStart() throws IOException {
         serverSocket = new ServerSocket(port);
-        LOGGER.info("start: " + serverSocket.toString());
+        LOGGER.info("SERVER CLIENT: start / " + serverSocket.toString());
+        try {
+            cliManager.restore();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

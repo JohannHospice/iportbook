@@ -1,5 +1,7 @@
 package com.iportbook.core.tools.net;
 
+import com.iportbook.core.tools.message.MessageUDP;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,5 +21,12 @@ public class DatagramSocketReceiver {
         DatagramPacket packet = new DatagramPacket(data, data.length);
         dso.receive(packet);
         return new String(packet.getData(), 0, packet.getLength());
+    }
+
+    public MessageUDP receiveMessageUDP() throws IOException {
+        byte[] data = new byte[3];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
+        dso.receive(packet);
+        return new MessageUDP(packet.getData());
     }
 }

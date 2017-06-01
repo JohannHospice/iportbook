@@ -1,21 +1,25 @@
+import com.iportbook.core.modele.Client;
+import com.iportbook.core.modele.Flux;
 import com.iportbook.core.tools.io.Serializer;
+import com.iportbook.core.tools.message.MessageTCP;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
 
 public class SerializerTest extends TestCase {
-    private ArrayList<String> data = new ArrayList<>();
-    private String filename = "data.txt";
+    private ArrayList<Client> data = new ArrayList<>();
+    private String filename = "test.bin";
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        data.add("jnkhjk");
-        data.add("jnkbvchjk");
-        data.add("gfd");
-        data.add("jnktyryhjk");
-        data.add("jnkfdsrehjk");
-        data.add("jbvcnkhjk");
+        Client cli1 = new Client("choco", 45, 9879);
+        Client cli = new Client("choco", 45, 9879);
+        cli1.addFriendsId(cli);
+        cli.addFriendsId(cli1);
+        cli.addFluxNotify(new Flux(3, new MessageTCP(MessageTCP.Type.FRIEN, MessageTCP.Operator.CRIGHT).addArguments("elds", "jkhj", "jklj")));
+        data.add(cli1);
+        data.add(cli);
     }
 
     public void testWrite() throws Exception {
@@ -23,7 +27,7 @@ public class SerializerTest extends TestCase {
     }
 
     public void testRead() throws Exception {
-        ArrayList<String> restore = (ArrayList<String>) Serializer.read(filename);
-        assertEquals(data, restore);
+        ArrayList<Client> restore = (ArrayList<Client>) Serializer.read(filename);
+        assertEquals(data.get(0).getId(), restore.get(0).getId());
     }
 }

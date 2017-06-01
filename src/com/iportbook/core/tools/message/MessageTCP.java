@@ -1,13 +1,14 @@
 package com.iportbook.core.tools.message;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MessageTCP {
+public class MessageTCP implements Serializable {
 
-    public enum Type {
+    public enum Type implements Serializable{
         REGIS("REGIS"), WELCO("WELCO"), GOBYE("GOBYE"), CONNE("CONNE"), HELLO("HELLO"), FRIE("FRIE"), MENUM("MENUM"),
         MESS("MESS"), FLOO("FLOO"), LIST("LIST"), RLIST("RLIST"), LINUM("LINUM"), CONSU("CONSU"), SSEM("SSEM"),
         MUNEM("MUNEM"), OOLF("OOLF"), EIRF("EIRF"), OKIRF("OKIRF"), NOKRF("NOKRF"), ACKRF("ACKRF"), FRIEN("FRIEN"),
@@ -33,7 +34,7 @@ public class MessageTCP {
         }
     }
 
-    public enum Operator {
+    public enum Operator implements Serializable{
         ASK("?"), CLEFT("<"), CRIGHT(">"), NONE("");
         private final String value;
 
@@ -88,9 +89,18 @@ public class MessageTCP {
         return type;
     }
 
+    public MessageTCP addArguments(String... args) {
+        arguments.addAll(Arrays.asList(args));
+        return this;
+    }
+
     public MessageTCP addArgument(String arg) {
         arguments.add(arg);
         return this;
+    }
+
+    public MessageTCP addArgument(int arg) {
+        return addArgument(String.valueOf(arg));
     }
 
     public MessageTCP setType(Type type) {
@@ -104,35 +114,33 @@ public class MessageTCP {
     }
 
     public static MessageTCP parse(String text) throws MessageTCPParseException {
-        MessageTCP message = null;
         Matcher matcher = pattern.matcher(text);
+        if (!matcher.find())
+            throw new MessageTCPParseException();
 
-        while (matcher.find()) {
+        Type type = Type.hasType(matcher.group(1));
 
-            String typeFounded = matcher.group(1);
-            Type type = Type.hasType(typeFounded);
+        Operator operator = Operator.hasType(matcher.group(2));
 
-            String operatorFounded = matcher.group(2);
-            Operator operator = Operator.hasType(operatorFounded);
+        if (type == null || operator == null)
+            throw new MessageTCPParseException();
 
-            if (type == null || operator == null)
-                throw new MessageTCPParseException();
+        MessageTCP messageTCP = new MessageTCP(type, operator);
 
-            String argsFounded = matcher.group(3);
+        String argsFounded = matcher.group(3);
+        if (argsFounded.length() > 0)
+            messageTCP.addArguments(argsFounded.substring(1).split(" "));
 
-            message = argsFounded.length() > 0 ?
-                    new MessageTCP(type, operator, argsFounded.substring(1).split(" ")) :
-                    new MessageTCP(type, operator);
-        }
-
-        return message;
+        return messageTCP;
     }
 
     public String compose() {
         StringBuilder concat = new StringBuilder();
+        concat.append(type.value).append(operator.value);
         for (String str : arguments)
             concat.append(" ").append(str);
-        return type.value + operator.value + concat.toString() + "+++";
+        concat.append("+++");
+        return concat.toString();
     }
 
     @Override

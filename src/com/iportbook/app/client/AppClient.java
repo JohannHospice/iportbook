@@ -1,28 +1,25 @@
 package com.iportbook.app.client;
 
-import com.iportbook.core.modele.Client;
-import com.iportbook.core.tools.ApplicationListener;
+import java.io.IOException;
 
-public class AppClient extends ApplicationListener {
-    private final int port;
-    private Client client;
+public class AppClient {
 
-    public AppClient(int port) {
-        this.port = port;
+    private ProcessorClient processorClient;
+
+    private AppClient(int port) throws IOException {
+        processorClient = new ProcessorClient("localhost", port);
     }
 
-    @Override
-    protected void onStart() {
-
+    private void start() {
+        new Thread(processorClient).start();
     }
 
-    @Override
-    protected void onLoop() {
-
-    }
-
-    @Override
-    protected void onEnd() {
-
+    public static void main(String args[]) throws IOException {
+        if (args.length != 1) {
+            System.out.println("Usage: java ChatServer port");
+            return;
+        }
+        AppClient appClient = new AppClient(Integer.parseInt(args[0]));
+        appClient.start();
     }
 }

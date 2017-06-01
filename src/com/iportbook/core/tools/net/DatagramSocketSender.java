@@ -1,12 +1,17 @@
 package com.iportbook.core.tools.net;
 
+import com.iportbook.core.tools.message.MessageUDP;
+
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class DatagramSocketSender {
     private final int targetPort;
     private final InetAddress address;
     private DatagramSocket dso;
+    private Logger LOGGER = Logger.getLogger("data");
 
     /**
      * @param targetPort int
@@ -31,13 +36,18 @@ public class DatagramSocketSender {
 
     public void send(String text) throws IOException {
         byte[] data = text.getBytes();
+        send(data);
         dso.send(new DatagramPacket(data, data.length, address, targetPort));
     }
 
     public void send(byte[] data) throws IOException {
+        LOGGER.info("receive: [" + Arrays.toString(data) + "]");
         dso.send(new DatagramPacket(data, data.length, address, targetPort));
     }
 
+    public void sendMessage(MessageUDP message) throws IOException {
+        send(message.getBytes());
+    }
     public void close() {
         dso.close();
     }

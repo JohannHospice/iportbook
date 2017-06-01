@@ -4,16 +4,19 @@ import java.io.*;
 
 public class Serializer {
     public static void write(String filename, Object data) throws IOException {
-        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename));
-        out.writeObject(data);
-        out.flush();
-        out.close();
+        FileOutputStream fos = new FileOutputStream(filename);
+        ObjectOutputStream oos = new ObjectOutputStream(fos );
+        oos.writeObject(data);
+        oos.close();
+        fos.close();
     }
 
     public static Object read(String filename) throws IOException, ClassNotFoundException {
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename));
-        Object data = in.readObject();
-        in.close();
+        FileInputStream fis = new FileInputStream(filename);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        Object data = ois.readObject();
+        ois.close();
+        fis.close();
         return data;
     }
 }

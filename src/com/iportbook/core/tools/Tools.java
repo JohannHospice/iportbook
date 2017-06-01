@@ -1,18 +1,22 @@
 package com.iportbook.core.tools;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 public class Tools {
     public static byte[] intToByteArray(int value) {
-        return new byte[]{
-                (byte) (value >>> 24),
-                (byte) (value >>> 16),
-                (byte) (value >>> 8),
-                (byte) value};
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.putInt(value);
+        bb.flip();
+        return bb.array();
     }
 
-    public static int byteArrayToInt(byte[] values) {
-        return values[3] & 0xFF |
-                (values[2] & 0xFF) << 8 |
-                (values[1] & 0xFF) << 16 |
-                (values[0] & 0xFF) << 24;
+    public static int byteArrayToInt(byte[] data) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.put(data);
+        bb.flip();
+        return bb.getInt();
     }
 }

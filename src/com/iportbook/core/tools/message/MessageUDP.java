@@ -2,6 +2,8 @@ package com.iportbook.core.tools.message;
 
 import com.iportbook.core.tools.Tools;
 
+import javax.tools.Tool;
+
 public class MessageUDP {
 
     private int notificationCode;
@@ -16,20 +18,15 @@ public class MessageUDP {
         setFluxSize(fluxSize);
     }
 
-    public byte[] compose() {
-        byte[] size = Tools.intToByteArray(fluxSize);
-        return new byte[]{(byte) notificationCode, size[3], size[2]};
+    public MessageUDP(byte[] data) {
+        notificationCode = (int) data[0];
+        fluxSize = Tools.byteArrayToInt(new byte[]{data[1], data[2], 0, 0});
     }
 
-    public static MessageUDP parse(byte[] bytes) {
-        return new MessageUDP(bytes[0], Tools.byteArrayToInt(new byte[]{
-                0,
-                0,
-                bytes[2],
-                bytes[1]
-        }));
+    public byte[] getBytes() {
+        byte[] data = Tools.intToByteArray(fluxSize);
+        return new byte[]{(byte) notificationCode, data[0], data[1]};
     }
-
 
     public int getFluxSize() {
         return fluxSize;

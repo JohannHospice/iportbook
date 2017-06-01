@@ -1,180 +1,110 @@
 package com.iportbook.app.server.client;
 
-import com.iportbook.core.modele.Client;
 import com.iportbook.core.modele.Flux;
-import com.iportbook.core.tools.Tools;
-import com.iportbook.core.tools.net.SocketHandler;
-import com.iportbook.core.tools.ApplicationListener;
-import com.iportbook.core.tools.composed.CompoundMessage;
-import com.iportbook.core.tools.composed.CompoundMessageById;
 import com.iportbook.core.tools.message.MessageTCP;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
 
-import static com.iportbook.core.tools.message.MessageTCP.Type.MESS;
+import static com.iportbook.core.tools.message.MessageTCP.*;
 
-public class ClientHandler extends ApplicationListener {
-    private HashMap<MessageTCP.Type, CompoundMessage> messageWaiting = new HashMap<>();
-    private final ClientManager cliManager;
-    private final SocketHandler soHandler;
-    private Client client;
+public class ClientHandler extends ClientHandlerAbstract {
 
     public ClientHandler(ClientManager cliManager, Socket socket) throws IOException {
-        this.cliManager = cliManager;
-        this.soHandler = new SocketHandler(socket);
+        super(socket, cliManager);
     }
 
     @Override
-    protected void onStart() {
-        try {
-            MessageTCP message = soHandler.receiveMessage();
-            LOGGER.info("received message: " + message);
-            switch (message.getType()) {
-                case CONNE:
-                    conne(message);
-                    break;
-                case REGIS:
-                    regis(message);
-                    break;
-                default:
-                    stop();
-                    break;
+    protected void regis(String id, int password, int port) throws Exception {
+        cliManager.addClient(id, password, port);
+        soHandler.sendMessage(new MessageTCP(Type.WELCO));
+    }
+
+    @Override
+    protected void conne(String id, int password) throws Exception {
+        client = cliManager.getClient(id, password);
+        soHandler.sendMessage(new MessageTCP(Type.HELLO));
+    }
+
+    @Override
+    protected void mess(String id, int numMess) throws Exception {
+        Flux flux = new Flux(3, new MessageTCP(Type.SSEM, MessageTCP.Operator.CRIGHT)
+                .addArguments(client.getId(), String.valueOf(numMess)));
+        for (int i = 0; i < numMess; i++) {
+            MessageTCP partial = soHandler.receiveMessage();
+            if (partial.getType() == Type.MENUM && partial.getArgumentSize() == 2) {
+                //TODO: verification
+                String num = partial.getArgument(0);
+                String mess = partial.getArgument(1);
+                flux.addPartial(new MessageTCP(Type.MUNEM).addArguments(num, mess));
             }
+        }
+        cliManager.addFlux(id, flux);
+    }
+
+    @Override
+    protected void floo(String mess) throws Exception {
+        Flux flux = new Flux(4, new MessageTCP(Type.OOLF, Operator.CRIGHT)
+                .addArguments(client.getId(), mess));
+        cliManager.floodFriend(client, flux);
+        soHandler.sendMessage(new MessageTCP(Type.FLOO, Operator.CRIGHT));
+    }
+
+    @Override
+    protected void frie(String id) throws Exception {
+        try {
+            cliManager.addFlux(id, new Flux(0, new MessageTCP(Type.EIRF, Operator.CRIGHT).addArgument(client.getId())));
+            soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CRIGHT));
         } catch (ClientException e) {
-            try {
-                soHandler.sendMessage(new MessageTCP(MessageTCP.Type.GOBYE));
-            } catch (Exception e1) {
-                e1.printStackTrace();
+            soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CLEFT));
+        }
+    }
+
+    @Override
+    protected void consu() throws Exception {
+        Flux flux = client.popFlux();
+        if (flux == null) {
+            soHandler.sendMessage(new MessageTCP(Type.NOCON));
+        } else {
+            MessageTCP fluxMessage = flux.getMessage();
+            soHandler.sendMessage(fluxMessage);
+            switch (fluxMessage.getType()) {
+                case SSEM:
+                    if (flux.hasPartials())
+                        for (int i = 0; i < flux.getPartialSize(); i++)
+                            soHandler.sendMessage(flux.getPartial(i));
+                    break;
+                case EIRF:
+                    if (fluxMessage.getOperator() == Operator.CRIGHT && fluxMessage.getArgumentSize() == 1) {
+                        Flux fluxAnswer = new Flux(new MessageTCP(Type.ACKRF));
+                        MessageTCP receiveMessage = soHandler.receiveMessage();
+                        String id = fluxMessage.getArgument(0);
+                        switch (receiveMessage.getType()) {
+                            case OKIRF:
+                                cliManager.addFriendship(id, client.getId());
+                                fluxAnswer.setType(1).addPartial(new MessageTCP(Type.FRIEN).addArguments(client.getId()));
+                                break;
+                            case NOKRF:
+                                fluxAnswer.setType(2).addPartial(new MessageTCP(Type.NOFRI).addArguments(client.getId()));
+                        }
+                        cliManager.addFlux(id, fluxAnswer);
+                    }
             }
-            stop();
-        } catch (Exception e) {
-            e.printStackTrace();
-            stop();
         }
     }
 
     @Override
-    protected void onLoop() {
-        try {
-            MessageTCP message = soHandler.receiveMessage();
-            LOGGER.info("receiveby/" + client.getId() + ": " + message);
-            handleLogon(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onEnd() {
-        try {
-            soHandler.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        cliManager.removeClientHandler(this);
-    }
-
-    private void handleLogon(MessageTCP message) throws Exception {
-        switch (message.getType()) {
-            case FRIE:
-                frie(message);
-                break;
-            case MENUM:
-                menum(message);
-                break;
-            case MESS:
-                mess(message);
-                break;
-            case FLOO:
-                floo(message);
-                break;
-            case LIST:
-                list(message);
-                break;
-            case CONSU:
-                consu(message);
-                break;
-            case IQUIT:
-                iquit();
-                break;
-        }
-    }
-
-    private void regis(MessageTCP message) throws Exception {
-        if (message.getArgumentSize() != 3)
-            throw new Exception();
-        client = new Client(
-                message.getArgument(0),
-                Tools.byteArrayToInt(message.getArgument(2).getBytes()),
-                Integer.parseInt(message.getArgument(1)));
-        cliManager.addClient(client);
-        soHandler.sendMessage(new MessageTCP(MessageTCP.Type.WELCO));
-    }
-
-    private void conne(MessageTCP message) throws Exception {
-        if (message.getArgumentSize() != 2)
-            throw new Exception();
-        client = cliManager.getClient(
-                message.getArgument(0),
-                message.getArgument(1));
-        soHandler.sendMessage(new MessageTCP(MessageTCP.Type.HELLO));
-    }
-
-    private void mess(MessageTCP message) throws Exception {
-        if (message.getArgumentSize() != 2 || message.getOperator() != MessageTCP.Operator.ASK)
-            throw new Exception();
-        String id = message.getArgument(0);
-        int numMess = Integer.parseInt(message.getArgument(1));
-        if (cliManager.hasClientById(id))
-            messageWaiting.put(MESS, new CompoundMessageById(id, numMess));
-    }
-
-    private void menum(MessageTCP message) throws Exception {
-        if (message.getArgumentSize() != 2 || !messageWaiting.containsKey(MESS))
-            throw new Exception();
-        CompoundMessageById compoundMessage = (CompoundMessageById) this.messageWaiting.get(MESS);
-        int num = Integer.parseInt(message.getArgument(0));
-        compoundMessage.setMessage(num, message.getArgument(1));
-        if (num >= compoundMessage.getSize() - 1) {
-            cliManager.addFluxToClient(compoundMessage.getId(), new Flux(3));
-            messageWaiting.remove(MESS);
-        }
-    }
-
-    private void list(MessageTCP message) throws Exception {
-        if (message.getOperator() != MessageTCP.Operator.ASK)
-            throw new Exception();
+    protected void list() throws Exception {
         int size = cliManager.getClientSize();
-        soHandler.sendMessage(new MessageTCP(MessageTCP.Type.RLIST).addArgument(String.valueOf(size)));
+        soHandler.sendMessage(new MessageTCP(Type.RLIST).addArgument(String.valueOf(size)));
         for (int i = 0; i < size; i++) {
-            Client client1 = cliManager.getClient(i);
-            soHandler.sendMessage(new MessageTCP(MessageTCP.Type.LINUM).addArgument(client1.getId()));
+            soHandler.sendMessage(new MessageTCP(Type.LINUM).addArgument(cliManager.getClient(i).getId()));
         }
     }
 
-    private void frie(MessageTCP message) throws Exception {
-        if (message.getArgumentSize() != 1 || message.getOperator() != MessageTCP.Operator.ASK)
-            throw new Exception();
-        String id = message.getArgument(0);
-        if (cliManager.hasClientById(id)) {
-            soHandler.sendMessage(new MessageTCP(MessageTCP.Type.FRIE, MessageTCP.Operator.CRIGHT));
-            cliManager.addFluxToClient(id, new Flux(0, client.getId()));
-        } else
-            soHandler.sendMessage(new MessageTCP(MessageTCP.Type.FRIE, MessageTCP.Operator.CLEFT));
-    }
-
-    private void floo(MessageTCP message) throws Exception {
-        throw new Exception();
-    }
-
-    private void consu(MessageTCP message) throws Exception {
-        throw new Exception();
-    }
-
-    private void iquit() throws Exception {
-        soHandler.sendMessage(new MessageTCP(MessageTCP.Type.GOBYE));
+    @Override
+    protected void iquit() throws Exception {
+        soHandler.sendMessage(new MessageTCP(Type.GOBYE));
         stop();
     }
 }

@@ -21,6 +21,7 @@ public abstract class ApplicationListener implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        LOGGER.info("stop");
     }
 
     protected abstract void onStart() throws Exception;

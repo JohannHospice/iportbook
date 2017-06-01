@@ -4,8 +4,10 @@ import com.iportbook.core.tools.message.MessageTCP;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class SocketHandler {
+    private static final Logger LOGGER = Logger.getAnonymousLogger();
     private final Socket socket;
     private BufferedReader br;
     private BufferedWriter bw;
@@ -19,12 +21,16 @@ public class SocketHandler {
     }
 
     public void send(String text) throws IOException {
+        LOGGER.info("send: [" + text + "]");
         getBw().write(text + '\n');
         getBw().flush();
     }
 
     public String receive() throws IOException {
-        return getBr().readLine();
+        String text = getBr().readLine();
+        if (null != text)
+            LOGGER.info("receive: [" + text + "]");
+        return text;
     }
 
     public MessageTCP receiveMessage() throws Exception {

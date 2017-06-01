@@ -15,7 +15,7 @@ public class ServerClientTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         serverClient = new ServerClient(PORTSERVER);
-        serverClient.getClientManager().addClient(new Client("bachata", "bachata", 8885));
+        serverClient.getClientManager().addClient(new Client("bachata", 125, 8885));
         new Thread(serverClient).start();
 
         TimeUnit.SECONDS.sleep(2);
