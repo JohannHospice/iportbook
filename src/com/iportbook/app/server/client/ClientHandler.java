@@ -5,6 +5,7 @@ import com.iportbook.core.tools.message.MessageTCP;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
 import static com.iportbook.core.tools.message.MessageTCP.*;
 
@@ -53,9 +54,12 @@ public class ClientHandler extends ClientHandlerAbstract {
     @Override
     protected void frie(String id) throws Exception {
         try {
+            if (Objects.equals(client.getId(), id) || !cliManager.hasClientById(id))
+                throw new Exception();
             cliManager.addFlux(id, new Flux(0, new MessageTCP(Type.EIRF, Operator.CRIGHT).addArgument(client.getId())));
             soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CRIGHT));
-        } catch (ClientException e) {
+
+        } catch (Exception e) {
             soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CLEFT));
         }
     }
@@ -68,17 +72,15 @@ public class ClientHandler extends ClientHandlerAbstract {
         } else {
             MessageTCP fluxMessage = flux.getMessage();
             soHandler.sendMessage(fluxMessage);
+            if (flux.hasPartials())
+                for (int i = 0; i < flux.getPartialSize(); i++)
+                    soHandler.sendMessage(flux.getPartial(i));
             switch (fluxMessage.getType()) {
-                case SSEM:
-                    if (flux.hasPartials())
-                        for (int i = 0; i < flux.getPartialSize(); i++)
-                            soHandler.sendMessage(flux.getPartial(i));
-                    break;
                 case EIRF:
                     if (fluxMessage.getOperator() == Operator.CRIGHT && fluxMessage.getArgumentSize() == 1) {
                         Flux fluxAnswer = new Flux(new MessageTCP(Type.ACKRF));
-                        MessageTCP receiveMessage = soHandler.receiveMessage();
                         String id = fluxMessage.getArgument(0);
+                        MessageTCP receiveMessage = soHandler.receiveMessage();
                         switch (receiveMessage.getType()) {
                             case OKIRF:
                                 cliManager.addFriendship(id, client.getId());

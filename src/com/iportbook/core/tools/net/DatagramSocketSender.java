@@ -41,8 +41,8 @@ public class DatagramSocketSender {
     }
 
     public void send(byte[] data) throws IOException {
-        LOGGER.info("receive: [" + Arrays.toString(data) + "]");
         dso.send(new DatagramPacket(data, data.length, address, targetPort));
+        LOGGER.info("[" + Arrays.toString(data) + "]");
     }
 
     public void sendMessage(MessageUDP message) throws IOException {

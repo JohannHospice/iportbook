@@ -62,6 +62,8 @@ public class ClientManager {
     }
 
     public void addFriendship(String id1, String id2) throws ClientException {
+        if (Objects.equals(id1, id2))
+            throw new ClientException("same client");
         Client cli1 = getClient(id1);
         Client cli2 = getClient(id2);
         cli2.addFriendsId(cli1);

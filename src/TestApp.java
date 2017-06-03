@@ -1,8 +1,8 @@
 import com.iportbook.core.tools.ApplicationListener;
+import com.iportbook.core.tools.net.DatagramSocketReceiver;
 import com.iportbook.core.tools.net.SocketHandler;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
@@ -12,21 +12,30 @@ public class TestApp extends ApplicationListener {
     private SocketHandler so;
     private Scanner scan;
 
-    class Reader extends ApplicationListener {
-
+    class ReaderTCP implements Runnable {
         @Override
-        protected void onStart() throws Exception {
-
+        public void run() {
+            try {
+                while (so.receive() != null)
+                    continue;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
+    private class ReaderUDP implements Runnable {
+        private static final int PORTUDP = 5656;
         @Override
-        protected void onLoop() throws Exception {
-            so.receive();
-        }
-
-        @Override
-        protected void onEnd() throws Exception {
-
+        public void run() {
+            try {
+                DatagramSocketReceiver udp = new DatagramSocketReceiver(PORTUDP);
+                while (true) {
+                    udp.receive();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -38,8 +47,8 @@ public class TestApp extends ApplicationListener {
     protected void onStart() throws Exception {
         this.so = new SocketHandler("localhost", port);
         this.scan = new Scanner(System.in);
-
-        new Thread(new Reader()).start();
+        new Thread(new ReaderTCP()).start();
+        new Thread(new ReaderUDP()).start();
     }
 
     @Override

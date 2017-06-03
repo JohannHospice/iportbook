@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 
 public class MessageTCP implements Serializable {
 
+    private int maxArgs;
+
     public enum Type implements Serializable{
         REGIS("REGIS"), WELCO("WELCO"), GOBYE("GOBYE"), CONNE("CONNE"), HELLO("HELLO"), FRIE("FRIE"), MENUM("MENUM"),
         MESS("MESS"), FLOO("FLOO"), LIST("LIST"), RLIST("RLIST"), LINUM("LINUM"), CONSU("CONSU"), SSEM("SSEM"),
@@ -111,6 +113,9 @@ public class MessageTCP implements Serializable {
     public MessageTCP setOperator(Operator operator) {
         this.operator = operator;
         return this;
+    }
+    public void setMaxArguments(int i){
+        this.maxArgs = i;
     }
 
     public static MessageTCP parse(String text) throws MessageTCPParseException {
