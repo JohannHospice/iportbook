@@ -76,40 +76,38 @@ public class AppClient extends ApplicationListener implements ClientAction {
      * @param input String
      * @return MessageTCP
      */
+    // TODO: process an easiest protocol for text treatment
 
     private MessageProcessor inputToMessageProcessor(String input) throws Exception {
-        String firstChar = input.substring(0, 1);
+    	String firstChar = input.substring(0, 1);
     	MessageProcessor mp = null;
 
     	if (firstChar == "+") {
-			String arr[] = input.split(" ", 2);
+    		String arr[] = input.split(" ", 2);
 
-		    switch (arr[0]) {
-		        case "+list":
-		        	mp = new MessageProcessor("LIST?");
-		            break;
-		        case "+frie":
-		            String id_fri = arr[1];
-		            mp = new MessageProcessor("FRIE?").setId(id_fri);
-		            break;
-		        case "+quit":
-		        	mp = new MessageProcessor("IQUIT");
-		            break;
-		        default: {
-		        	String id_dest = arr[0].substring(1, arr[0].length());
-		        	mp = new MessageProcessor("MESS?").setId(id_dest).setMess(arr[1]);
-		        	break;
-		        }
-		    }
-		}
-
-		else if (!input.isEmpty()){
-			mp = new MessageProcessor("FLOO?").setMess(input);
-		}
-
-        return mp;
-    }
-
+    		switch (arr[0]) {
+    				case "+list":
+    					mp = new MessageProcessor("LIST?");
+    					break;
+    				case "+frie":
+    					String id_fri = arr[1];
+    					mp = new MessageProcessor("FRIE?").setId(id_fri);
+    					break;
+    				case "+quit":
+    					mp = new MessageProcessor("IQUIT");
+    					break;
+    				default: {
+    					String id_dest = arr[0].substring(1, arr[0].length());
+    					mp = new MessageProcessor("MESS?").setId(id_dest).setMess(arr[1]);
+    					break;
+    			}
+    		}
+    	}
+    	else if (!input.isEmpty()){
+    		mp = new MessageProcessor("FLOO?").setMess(input);
+    	}
+    	return mp;
+	}
     /**
      * get next text wrote on terminal with a specific pattern(regex)
      *
@@ -145,6 +143,21 @@ public class AppClient extends ApplicationListener implements ClientAction {
     //TODO
     @Override
     public void regis(String id, int password, int port) throws Exception {
+    	daSo.send(new MessageProcessor("REGIS").setId(id).setPassword(password).setPort(port).build());
+    	
+    	MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+    	String type = messageProcessor.getType();
+    	switch(type) {
+    		case "WELCO":
+    			System.out.println("Utilisateur enregistree" + messageProcessor.getId() + " " + messageProcessor.getPassword());
+    			break;
+    		case "GOBYE":
+    			System.out.println("Serveur rempli ou Mauvais port ou Mauvais password");
+    			stop();
+    		default:
+    			System.out.println("Fatal Error Register");
+    			stop();
+    	}
     }
 
     @Override
