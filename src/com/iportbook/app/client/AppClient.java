@@ -14,7 +14,7 @@ public class AppClient extends ApplicationListener {
     /**
      * allow you to send and receive TCP request
      */
-    private DataSocket soHandler;
+    private DataSocket daSo;
     private NotificationHandler notificationHandler;
 
     private AppClient(String host, int portTCP, int portUDP) throws IOException {
@@ -22,7 +22,7 @@ public class AppClient extends ApplicationListener {
         this.portTCP = portTCP;
         scanner = new Scanner(System.in);
         notificationHandler = new NotificationHandler(portUDP);
-        soHandler = new DataSocket();
+        daSo = new DataSocket();
     }
 
     @Override
@@ -30,8 +30,8 @@ public class AppClient extends ApplicationListener {
         // run udp notification handler
         new Thread(notificationHandler).start();
         // run tcp
-        soHandler.bind(host, portTCP);
-        portTCP = soHandler.getLocalPort();
+        daSo.bind(host, portTCP);
+        portTCP = daSo.getLocalPort();
 
         //conne regi
         System.out.println("connection: 0, register: 1");
@@ -49,17 +49,17 @@ public class AppClient extends ApplicationListener {
     protected void onLoop() throws Exception {
         // first send
         String text = scanner.nextLine();
-        soHandler.send(textToMessageTCP(text).build());
+        daSo.send(inputToMessageProcessor(text).build());
 
         // then receive answer
-        MessageProcessor received = new MessageProcessor(soHandler.read());
+        MessageProcessor received = new MessageProcessor(daSo.read());
         switch (received.getType()) {
         }
     }
 
     @Override
     protected void onEnd() throws Exception {
-        soHandler.close();
+        daSo.close();
         scanner.close();
     }
 
@@ -70,7 +70,7 @@ public class AppClient extends ApplicationListener {
      * @param text String
      * @return MessageTCP
      */
-    private MessageProcessor textToMessageTCP(String text) {
+    private MessageProcessor inputToMessageProcessor(String input) {
         // process an easiest protocol for text treatment
         return null;
     }

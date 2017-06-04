@@ -10,18 +10,18 @@ import java.net.Socket;
 
 public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected final ClientManager cliManager;
-    protected final DataSocket soHandler;
+    protected final DataSocket daSo;
     protected Client client;
 
     protected ClientHandlerAbstract(Socket socket, ClientManager cliManager) throws IOException {
-        this.soHandler = new DataSocket(socket);
+        this.daSo = new DataSocket(socket);
         this.cliManager = cliManager;
     }
 
     @Override
     protected void onStart() {
         try {
-            MessageProcessor message = new MessageProcessor(soHandler.read());
+            MessageProcessor message = new MessageProcessor(daSo.read());
             String type = message.getType();
             String id = message.getId();
             switch (type) {
@@ -42,7 +42,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
             }
         } catch (ClientException e) {
             try {
-                soHandler.send(new MessageProcessor("GOBYE").build());
+                daSo.send(new MessageProcessor("GOBYE").build());
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -56,7 +56,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onLoop() {
         try {
-            MessageProcessor message = new MessageProcessor(soHandler.read());
+            MessageProcessor message = new MessageProcessor(daSo.read());
             String type = message.getType();
             switch (type) {
                 case "FRIE?": {
@@ -95,7 +95,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onEnd() {
         try {
-            soHandler.close();
+            daSo.close();
         } catch (IOException e1) {
             e1.printStackTrace();
         }

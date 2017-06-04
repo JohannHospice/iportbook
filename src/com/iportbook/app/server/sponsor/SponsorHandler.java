@@ -7,15 +7,15 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class SponsorHandler extends ApplicationListener {
-    private final DataSocket soHandler;
+    private final DataSocket daSo;
 
     SponsorHandler(Socket socket) throws IOException {
-        this.soHandler = new DataSocket(socket);
+        this.daSo = new DataSocket(socket);
     }
 
     @Override
     protected void onStart() throws Exception {
-        soHandler.read();
+        daSo.read();
     }
 
     @Override
