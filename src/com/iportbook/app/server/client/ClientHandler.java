@@ -74,18 +74,21 @@ public class ClientHandler extends ClientHandlerAbstract {
                     soHandler.send(flux.getPartial(i));
             switch (fluxMessage.getType()) {
                 case "EIRF>": {
-                    Flux fluxAnswer = new Flux(new MessageProcessor("ACKRF").build());
                     String id = fluxMessage.getId();
                     MessageProcessor receiveMessage = new MessageProcessor(soHandler.read());
-                    switch (receiveMessage.getType()) {
-                        case "OKIRF":
+                    String type = receiveMessage.getType();
+                    switch (type) {
+                        case "OKIRF": {
+                            soHandler.send(new MessageProcessor("ACKRF").build());
                             cliManager.addFriendship(id, client.getId());
-                            fluxAnswer.setType(1).addPartial(new MessageProcessor("FRIEN").setId(client.getId()).build());
+                            cliManager.addFlux(id, new Flux(1, new MessageProcessor("FRIEN").setId(client.getId()).build()));
                             break;
-                        case "NOKRF":
-                            fluxAnswer.setType(2).addPartial(new MessageProcessor("NOFRI").setId(client.getId()).build());
+                        }
+                        case "NOKRF": {
+                            soHandler.send(new MessageProcessor("ACKRF").build());
+                            cliManager.addFlux(id, new Flux(2, new MessageProcessor("NOFRI").setId(client.getId()).build()));
+                        }
                     }
-                    cliManager.addFlux(id, fluxAnswer);
                 }
             }
         }
