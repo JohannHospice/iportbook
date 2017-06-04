@@ -76,11 +76,38 @@ public class AppClient extends ApplicationListener implements ClientAction {
      * @param input String
      * @return MessageTCP
      */
-    // TODO: process an easiest protocol for text treatment
-    private MessageProcessor inputToMessageProcessor(String input) {
-        MessageProcessor messageProcessor = new MessageProcessor();
 
-        return null;
+    private MessageProcessor inputToMessageProcessor(String input) throws Exception {
+        String firstChar = input.substring(0, 1);
+    	MessageProcessor mp = null;
+
+    	if (firstChar == "+") {
+			String arr[] = input.split(" ", 2);
+
+		    switch (arr[0]) {
+		        case "+list":
+		        	mp = new MessageProcessor("LIST?");
+		            break;
+		        case "+frie":
+		            String id_fri = arr[1];
+		            mp = new MessageProcessor("FRIE?").setId(id_fri);
+		            break;
+		        case "+quit":
+		        	mp = new MessageProcessor("IQUIT");
+		            break;
+		        default: {
+		        	String id_dest = arr[0].substring(1, arr[0].length());
+		        	mp = new MessageProcessor("MESS?").setId(id_dest).setMess(arr[1]);
+		        	break;
+		        }
+		    }
+		}
+
+		else if (!input.isEmpty()){
+			mp = new MessageProcessor("FLOO?").setMess(input);
+		}
+
+        return mp;
     }
 
     /**
