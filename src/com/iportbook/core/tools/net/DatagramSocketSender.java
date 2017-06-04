@@ -11,7 +11,7 @@ public class DatagramSocketSender {
     private final int targetPort;
     private final InetAddress address;
     private DatagramSocket dso;
-    private Logger LOGGER = Logger.getLogger("data");
+    private Logger LOGGER = Logger.getAnonymousLogger();
 
     /**
      * @param targetPort int
@@ -53,4 +53,11 @@ public class DatagramSocketSender {
         dso.close();
     }
 
+    public String getHost() {
+        return address.getHostAddress();
+    }
+
+    public int getPort() {
+        return targetPort;
+    }
 }

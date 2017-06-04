@@ -14,7 +14,8 @@ public class ServerClient extends ServerListener {
     }
 
     @Override
-    protected void start() {
+    protected void onStart() throws IOException {
+        super.onStart();
         try {
             cliManager.restore();
         } catch (Exception e) {
@@ -23,9 +24,10 @@ public class ServerClient extends ServerListener {
     }
 
     @Override
-    protected void close() {
+    protected void onEnd() {
         cliManager.stop();
         LOGGER.info("shutdown");
+        super.onEnd();
     }
 
     @Override

@@ -1,15 +1,14 @@
 package com.iportbook.app.client;
 
 import com.iportbook.app.ClientAction;
+import com.iportbook.app.TerminalScanner;
 import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
-import java.util.Scanner;
 
 public class AppClient extends ApplicationListener implements ClientAction {
-    private final Scanner scanner;
     private final String host;
     private int portTCP;
     /**
@@ -17,11 +16,11 @@ public class AppClient extends ApplicationListener implements ClientAction {
      */
     private DataSocket daSo;
     private NotificationHandler notificationHandler;
+    private TerminalScanner termScanner = new TerminalScanner();
 
     private AppClient(String host, int portTCP, int portUDP) throws IOException {
         this.host = host;
         this.portTCP = portTCP;
-        scanner = new Scanner(System.in);
         notificationHandler = new NotificationHandler(portUDP);
         daSo = new DataSocket();
     }
@@ -35,9 +34,9 @@ public class AppClient extends ApplicationListener implements ClientAction {
         portTCP = daSo.getLocalPort();
 
         //conne regis
-        char type = ask("connection(0), register(1): ", "\\d").charAt(0);
-        String id = ask("identifiant: ");
-        int password = Integer.parseInt(ask("password: "));
+        char type = termScanner.ask("connection(0), register(1): ", "\\d").charAt(0);
+        String id = termScanner.ask("identifiant: ");
+        int password = Integer.parseInt(termScanner.ask("password: "));
 
         switch (type) {
             case '0':
@@ -53,7 +52,7 @@ public class AppClient extends ApplicationListener implements ClientAction {
     @Override
     protected void onLoop() throws Exception {
         // first send
-        String text = scanner.nextLine();
+        String text = termScanner.nextLine();
         daSo.send(inputToMessageProcessor(text).build());
 
         // then receive answer
@@ -66,7 +65,7 @@ public class AppClient extends ApplicationListener implements ClientAction {
     @Override
     protected void onEnd() throws Exception {
         daSo.close();
-        scanner.close();
+        termScanner.close();
     }
 
     /**
@@ -76,70 +75,35 @@ public class AppClient extends ApplicationListener implements ClientAction {
      * @param input String
      * @return MessageTCP
      */
-
     private MessageProcessor inputToMessageProcessor(String input) throws Exception {
         String firstChar = input.substring(0, 1);
-    	MessageProcessor mp = null;
+        MessageProcessor mp = null;
 
-    	if (firstChar == "+") {
-			String arr[] = input.split(" ", 2);
+        if (firstChar == "+") {
+            String arr[] = input.split(" ", 2);
 
-		    switch (arr[0]) {
-		        case "+list":
-		        	mp = new MessageProcessor("LIST?");
-		            break;
-		        case "+frie":
-		            String id_fri = arr[1];
-		            mp = new MessageProcessor("FRIE?").setId(id_fri);
-		            break;
-		        case "+quit":
-		        	mp = new MessageProcessor("IQUIT");
-		            break;
-		        default: {
-		        	String id_dest = arr[0].substring(1, arr[0].length());
-		        	mp = new MessageProcessor("MESS?").setId(id_dest).setMess(arr[1]);
-		        	break;
-		        }
-		    }
-		}
-
-		else if (!input.isEmpty()){
-			mp = new MessageProcessor("FLOO?").setMess(input);
-		}
+            switch (arr[0]) {
+                case "+list":
+                    mp = new MessageProcessor("LIST?");
+                    break;
+                case "+frie":
+                    String id_fri = arr[1];
+                    mp = new MessageProcessor("FRIE?").setId(id_fri);
+                    break;
+                case "+quit":
+                    mp = new MessageProcessor("IQUIT");
+                    break;
+                default: {
+                    String id_dest = arr[0].substring(1, arr[0].length());
+                    mp = new MessageProcessor("MESS?").setId(id_dest).setMess(arr[1]);
+                    break;
+                }
+            }
+        } else if (!input.isEmpty()) {
+            mp = new MessageProcessor("FLOO?").setMess(input);
+        }
 
         return mp;
-    }
-
-    /**
-     * get next text wrote on terminal with a specific pattern(regex)
-     *
-     * @param pattern String
-     * @return String
-     */
-    private String getNext(String pattern) {
-        String next = null;
-        while (scanner.hasNext(pattern))
-            next = scanner.next();
-        return next;
-    }
-
-    public String ask(String question) {
-        System.out.println(question);
-        return scanner.nextLine();
-    }
-
-    public String ask(String question, String pattern) {
-        System.out.println(question);
-        return getNext(pattern);
-    }
-
-    public static void main(String args[]) throws IOException {
-        if (args.length != 1) {
-            System.out.println("Usage: java ChatServer portTCP");
-            return;
-        }
-        AppClient appClient = new AppClient("localhost", Integer.parseInt(args[0]), 8383);
-        new Thread(appClient).start();
     }
 
     //TODO
@@ -201,5 +165,18 @@ public class AppClient extends ApplicationListener implements ClientAction {
     @Override
     public void iquit() throws Exception {
 
+    }
+
+    public static void main(String args[]) throws IOException {
+        if (args.length != 2) {
+            System.out.println("Usage: need 2 arguments");
+            return;
+        }
+        final String hostTCP = "localhost";
+        final int portTCP = Integer.parseInt(args[0]);
+        final int portUDP = Integer.parseInt(args[1]);
+
+        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
+        new Thread(appClient).start();
     }
 }

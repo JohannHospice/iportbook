@@ -34,24 +34,12 @@ public class MessageProcessor extends ByteProcessor {
         set(type);
     }
 
-    public MessageProcessor close() {
-        return (MessageProcessor) set(CONS_PLUS);
-    }
-
     public String getType() {
         return setOffset(0).getString(SIZE_TYPE);
     }
 
-    public MessageProcessor setType(String value) {
-        return (MessageProcessor) setOffset(0).set(value);
-    }
-
     public String getId() throws Exception {
         return jump().getStringUntil(SIZE_ID, WHITEESCAPE, CONS_PLUS);
-    }
-
-    public MessageProcessor setId(String value) {
-        return (MessageProcessor) set(' ').set(value);
     }
 
     public String getMess() throws Exception {
@@ -60,10 +48,6 @@ public class MessageProcessor extends ByteProcessor {
 
     public String getPromMess() throws Exception {
         return jump().getStringUntil(SIZE_PROM_MESS, CONS_PLUS);
-    }
-
-    public MessageProcessor setMess(String value) {
-        return (MessageProcessor) set(' ').set(value);
     }
 
     public String getIpDiff() throws Exception {
@@ -78,45 +62,65 @@ public class MessageProcessor extends ByteProcessor {
         return matcher.group(1);
     }
 
-    public int getNumItem() {
-        return jump().getInt(SIZE_NUM_ITEM);
-    }
-
-    public MessageProcessor setNumItem(int value) {
-        return (MessageProcessor) set(' ').set(value, SIZE_NUM_ITEM);
-    }
-
     public int getNumMess() {
         return jump().getInt(SIZE_NUM_MESS);
-    }
-
-    public MessageProcessor setNumMess(int value) {
-        return (MessageProcessor) set(' ').set(value, SIZE_NUM_MESS);
     }
 
     public int getPassword() {
         return jump().getIntByLittleEndian(SIZE_MDP);
     }
 
-    public MessageProcessor setPassword(int value) {
-        return (MessageProcessor) set(' ').setIntByLittleEndian(value);
-    }
-
     public int getPort() {
         return jump().getInt(SIZE_PORT);
     }
 
+    public int getNumItem() {
+        return jump().getInt(SIZE_NUM_ITEM);
+    }
+
+    public MessageProcessor setType(String value) {
+        return (MessageProcessor) setOffset(0).set(value);
+    }
+
+    public MessageProcessor setId(String value) {
+        return (MessageProcessor) set(' ').set(value);
+    }
+
+    public MessageProcessor setMess(String value) {
+        return (MessageProcessor) set(' ').set(value);
+    }
+
+    public MessageProcessor setNumItem(int value) {
+        return (MessageProcessor) set(' ').set(value, SIZE_NUM_ITEM);
+    }
+
+    public MessageProcessor setNumMess(int value) {
+        return (MessageProcessor) set(' ').set(value, SIZE_NUM_MESS);
+    }
+
+    public MessageProcessor setPassword(int value) {
+        return (MessageProcessor) set(' ').setIntByLittleEndian(value);
+    }
+
+    public MessageProcessor setIpDiff(String ipDiff) throws Exception {
+        Matcher matcher = Pattern.compile("^((\\d{0,3}\\.){3}(\\d{0,3}))$", Pattern.DOTALL).matcher(ipDiff);
+        if (!matcher.find())
+            throw new Exception();
+        set(' ').set(matcher.group(1));
+        for (int i = 0; i < SIZE_IP_DIFF - ipDiff.length(); i++)
+            set('#');
+        return this;
+    }
+
+    public MessageProcessor setPort(int port) {
+        return (MessageProcessor) set(' ').set(port, SIZE_PORT);
+    }
+
+    public MessageProcessor close() {
+        return (MessageProcessor) set(CONS_PLUS);
+    }
+
     public byte[] build() {
         return close().getBytes();
-    }
-
-    //TODO
-    public MessageProcessor setIpDiff(String ipDiff) {
-        return null;
-    }
-
-    //TODO
-    public MessageProcessor setPort(int port) {
-        return null;
     }
 }

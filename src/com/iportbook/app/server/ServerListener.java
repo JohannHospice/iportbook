@@ -18,7 +18,6 @@ public abstract class ServerListener extends ApplicationListener {
     protected void onStart() throws IOException {
         serverSocket = new ServerSocket(port);
         LOGGER.info("listen: " + serverSocket.toString());
-        start();
     }
 
     @Override
@@ -40,12 +39,7 @@ public abstract class ServerListener extends ApplicationListener {
             e.printStackTrace();
         }
         LOGGER.info("shutdown");
-        close();
     }
-
-    protected abstract void start();
-
-    protected abstract void close();
 
     protected abstract void onAccept(Socket accept) throws IOException;
 
