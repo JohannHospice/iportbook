@@ -75,6 +75,7 @@ public class AppClient extends ApplicationListener implements ClientAction {
      * @param input String
      * @return MessageTCP
      */
+    // TODO: process an easiest protocol for text treatment
     private MessageProcessor inputToMessageProcessor(String input) throws Exception {
         String firstChar = input.substring(0, 1);
         MessageProcessor mp = null;
@@ -102,13 +103,27 @@ public class AppClient extends ApplicationListener implements ClientAction {
         } else if (!input.isEmpty()) {
             mp = new MessageProcessor("FLOO?").setMess(input);
         }
-
         return mp;
     }
 
     //TODO
     @Override
     public void regis(String id, int password, int port) throws Exception {
+        daSo.send(new MessageProcessor("REGIS").setId(id).setPassword(password).setPort(port).build());
+
+        MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+        String type = messageProcessor.getType();
+        switch (type) {
+            case "WELCO":
+                System.out.println("Utilisateur enregistree" + messageProcessor.getId() + " " + messageProcessor.getPassword());
+                break;
+            case "GOBYE":
+                System.out.println("Serveur rempli ou Mauvais port ou Mauvais password");
+                stop();
+            default:
+                System.out.println("Fatal Error Register");
+                stop();
+        }
     }
 
     @Override

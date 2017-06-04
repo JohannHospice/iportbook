@@ -29,16 +29,22 @@ public class NotificationHandler extends ApplicationListener {
         //TODO: different print switch notif
         switch (notificationProcessor.getCode()) {
             case Flux.FLOO:
+            	System.out.println("Recu un flood");
                 break;
             case Flux.FRIE:
+            	System.out.println("Recu une requete d'ami");
                 break;
             case Flux.MESS:
+            	System.out.println("Recu un message prive");
                 break;
             case Flux.NOKRF:
+            	System.out.println("Requete d'ami refusee");
                 break;
             case Flux.OKIRF:
+            	System.out.println("Requete d'ami acceptee");
                 break;
             case Flux.PUBL:
+            	System.out.println("Recu une publicite");
                 break;
         }
     }
