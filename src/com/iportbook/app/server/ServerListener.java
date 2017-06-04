@@ -15,13 +15,14 @@ public abstract class ServerListener extends ApplicationListener {
     }
 
     @Override
-    public void onStart() throws IOException {
+    protected void onStart() throws IOException {
         serverSocket = new ServerSocket(port);
         LOGGER.info("listen: " + serverSocket.toString());
+        start();
     }
 
     @Override
-    public void onLoop() {
+    protected void onLoop() {
         try {
             Socket so = serverSocket.accept();
             LOGGER.info("accept: " + so);
@@ -32,16 +33,21 @@ public abstract class ServerListener extends ApplicationListener {
     }
 
     @Override
-    public void onEnd() {
+    protected void onEnd() {
         try {
             serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         LOGGER.info("shutdown");
+        close();
     }
 
-    protected abstract void onAccept(Socket accept);
+    protected abstract void start();
+
+    protected abstract void close();
+
+    protected abstract void onAccept(Socket accept) throws IOException;
 
     public int getPort() {
         return port;

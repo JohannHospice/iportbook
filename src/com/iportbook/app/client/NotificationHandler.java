@@ -1,5 +1,6 @@
 package com.iportbook.app.client;
 
+import com.iportbook.core.modele.Flux;
 import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.net.DatagramSocketReceiver;
 import com.iportbook.core.tools.processor.NotificationProcessor;
@@ -25,15 +26,19 @@ public class NotificationHandler extends ApplicationListener {
     protected void onLoop() throws IOException {
         NotificationProcessor notificationProcessor = datagramSocketReceiver.receiveMessageUDP();
         System.out.println("nb notif: " + notificationProcessor.getFluxSize());
-        // different print switch notif
+        //TODO: different print switch notif
         switch (notificationProcessor.getCode()) {
-            case 0:
+            case Flux.FLOO:
                 break;
-            case 1:
+            case Flux.FRIE:
                 break;
-            case 2:
+            case Flux.MESS:
                 break;
-            case 3:
+            case Flux.NOKRF:
+                break;
+            case Flux.OKIRF:
+                break;
+            case Flux.PUBL:
                 break;
         }
     }

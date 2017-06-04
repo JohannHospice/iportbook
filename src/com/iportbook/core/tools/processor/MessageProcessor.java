@@ -19,6 +19,7 @@ public class MessageProcessor extends ByteProcessor {
     private static final int SIZE_NUM_MESS = 4;
     private static final int SIZE_MDP = 2;
     private static final int SIZE_TYPE = 5;
+    private static final int SIZE_PROM_MESS = 300;
 
     public MessageProcessor() {
         super(SIZE_MAX);
@@ -55,6 +56,10 @@ public class MessageProcessor extends ByteProcessor {
 
     public String getMess() throws Exception {
         return jump().getStringUntil(SIZE_MESS, CONS_PLUS);
+    }
+
+    public String getPromMess() throws Exception {
+        return jump().getStringUntil(SIZE_PROM_MESS, CONS_PLUS);
     }
 
     public MessageProcessor setMess(String value) {
@@ -103,5 +108,15 @@ public class MessageProcessor extends ByteProcessor {
 
     public byte[] build() {
         return close().getBytes();
+    }
+
+    //TODO
+    public MessageProcessor setIpDiff(String ipDiff) {
+        return null;
+    }
+
+    //TODO
+    public MessageProcessor setPort(int port) {
+        return null;
     }
 }

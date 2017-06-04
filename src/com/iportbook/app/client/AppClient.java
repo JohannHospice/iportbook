@@ -1,5 +1,6 @@
 package com.iportbook.app.client;
 
+import com.iportbook.app.ClientAction;
 import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.core.tools.processor.MessageProcessor;
@@ -7,7 +8,7 @@ import com.iportbook.core.tools.processor.MessageProcessor;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class AppClient extends ApplicationListener {
+public class AppClient extends ApplicationListener implements ClientAction {
     private final Scanner scanner;
     private final String host;
     private int portTCP;
@@ -33,14 +34,18 @@ public class AppClient extends ApplicationListener {
         daSo.bind(host, portTCP);
         portTCP = daSo.getLocalPort();
 
-        //conne regi
-        System.out.println("connection: 0, register: 1");
-        switch (getNext("\\d").charAt(0)) {
+        //conne regis
+        char type = ask("connection(0), register(1): ", "\\d").charAt(0);
+        String id = ask("identifiant: ");
+        int password = Integer.parseInt(ask("password: "));
+
+        switch (type) {
             case '0':
-                //get id and pwd
+                conne(id, password);
                 break;
             case '1':
-                //get id, pwd and portUdp
+                int port = notificationHandler.getPort();
+                regis(id, password, port);
                 break;
         }
     }
@@ -54,6 +59,7 @@ public class AppClient extends ApplicationListener {
         // then receive answer
         MessageProcessor received = new MessageProcessor(daSo.read());
         switch (received.getType()) {
+            //TODO: each case of server answer (in relation with the message sent
         }
     }
 
@@ -67,11 +73,13 @@ public class AppClient extends ApplicationListener {
      * get MessageTCP object by raw text
      * transformation has to be determine there
      *
-     * @param text String
+     * @param input String
      * @return MessageTCP
      */
+    // TODO: process an easiest protocol for text treatment
     private MessageProcessor inputToMessageProcessor(String input) {
-        // process an easiest protocol for text treatment
+        MessageProcessor messageProcessor = new MessageProcessor();
+
         return null;
     }
 
@@ -88,6 +96,16 @@ public class AppClient extends ApplicationListener {
         return next;
     }
 
+    public String ask(String question) {
+        System.out.println(question);
+        return scanner.nextLine();
+    }
+
+    public String ask(String question, String pattern) {
+        System.out.println(question);
+        return getNext(pattern);
+    }
+
     public static void main(String args[]) throws IOException {
         if (args.length != 1) {
             System.out.println("Usage: java ChatServer portTCP");
@@ -95,5 +113,66 @@ public class AppClient extends ApplicationListener {
         }
         AppClient appClient = new AppClient("localhost", Integer.parseInt(args[0]), 8383);
         new Thread(appClient).start();
+    }
+
+    //TODO
+    @Override
+    public void regis(String id, int password, int port) throws Exception {
+    }
+
+    @Override
+    public void conne(String id, int password) throws Exception {
+        daSo.send(new MessageProcessor("CONNE").setId(id).setPassword(password).build());
+
+        MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+        String type = messageProcessor.getType();
+        switch (type) {
+            case "HELLO":
+                System.out.println("vous etes bien connecté");
+                break;
+            case "GODBY": {
+                System.out.println("erreur lors de la connection");
+                stop();
+            }
+            default: {
+                System.err.println("fatal error");
+                stop();
+            }
+        }
+    }
+
+    //TODO
+    @Override
+    public void mess(String id, int numMess) throws Exception {
+    }
+
+    //TODO
+    @Override
+    public void frie(String id) throws Exception {
+
+    }
+
+    //TODO
+    @Override
+    public void floo(String mess) throws Exception {
+
+    }
+
+    //TODO
+    @Override
+    public void consu() throws Exception {
+
+    }
+
+    //TODO
+    @Override
+    public void list() throws Exception {
+
+    }
+
+    //TODO
+    @Override
+    public void iquit() throws Exception {
+
     }
 }

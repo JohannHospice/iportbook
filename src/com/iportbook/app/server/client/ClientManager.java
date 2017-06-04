@@ -12,20 +12,20 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class ClientManager {
+    private static ClientManager self = null;
     private ArrayList<Client> clients = new ArrayList<>();
     private ArrayList<ClientHandlerAbstract> cliHandlers = new ArrayList<>();
-    private String filename;
+    private static final String FILENAME = "sav.bin";
 
-    public ClientManager(String filename) {
-        this.filename = filename;
+    private ClientManager() {
     }
 
     public void store() throws IOException {
-        Serializer.write(filename, clients);
+        Serializer.write(FILENAME, clients);
     }
 
     public void restore() throws IOException, ClassNotFoundException {
-        clients.addAll((Collection<? extends Client>) Serializer.read(filename));
+        clients.addAll((Collection<? extends Client>) Serializer.read(FILENAME));
     }
 
     public void stop() {
@@ -38,13 +38,26 @@ public class ClientManager {
         }
     }
 
-    public void addFlux(String id, Flux flux) throws Exception {
-        getClient(id).addFluxNotify(flux);
+    public void addFlux(Client cli, Flux flux) throws Exception {
+        cli.addFluxNotify(flux);
         try {
             store();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addFlux(String id, Flux flux) throws Exception {
+        addFlux(getClient(id), flux);
+    }
+
+    public void addFluxToAll(Flux flux) throws Exception {
+        for (Client cli : clients)
+            addFlux(cli, flux);
+    }
+
+    public void addFluxToAll(int type, byte[] data) throws Exception {
+        addFluxToAll(new Flux(type, data));
     }
 
     public void floodFriend(Client client, Flux flux) throws ClientException, IOException {
@@ -94,7 +107,7 @@ public class ClientManager {
     }
 
     public void addClientHandler(Socket socket) throws IOException {
-        ClientHandler clientHandler = new ClientHandler(this, socket);
+        ClientHandler clientHandler = new ClientHandler(socket);
         cliHandlers.add(clientHandler);
         new Thread(clientHandler).start();
     }
@@ -148,4 +161,9 @@ public class ClientManager {
         return clients.size();
     }
 
+    public static ClientManager getInstance() {
+        if (self == null)
+            self = new ClientManager();
+        return self;
+    }
 }

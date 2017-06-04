@@ -1,40 +1,33 @@
 package com.iportbook.app.server.sponsor;
 
-import com.iportbook.core.tools.ApplicationListener;
+import com.iportbook.app.server.ServerListener;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 
-public class ServerSponsor extends ApplicationListener {
+public class ServerSponsor extends ServerListener {
     private ArrayList<SponsorHandler> sponsorHandlers = new ArrayList<>();
-    private ServerSocket serverSocket;
-    private int port;
 
     public ServerSponsor(int port) {
-        this.port = port;
+        super(port);
     }
 
     @Override
-    protected void onStart() throws IOException {
-        serverSocket = new ServerSocket(port);
+    protected void start() {
+
     }
 
     @Override
-    protected void onLoop() throws IOException {
-        try {
-            SponsorHandler sponsorHandler = new SponsorHandler(serverSocket.accept());
-            sponsorHandlers.add(sponsorHandler);
-            new Thread(sponsorHandler).start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    protected void onAccept(Socket accept) throws IOException {
+        SponsorHandler sponsorHandler = new SponsorHandler(accept);
+        sponsorHandlers.add(sponsorHandler);
+        new Thread(sponsorHandler).start();
     }
 
     @Override
-    protected void onEnd() throws IOException {
+    protected void close() {
         for (SponsorHandler spo : sponsorHandlers)
             spo.stop();
-        serverSocket.close();
     }
 }

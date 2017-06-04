@@ -1,5 +1,6 @@
 package com.iportbook.app.server.client;
 
+import com.iportbook.app.ClientAction;
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.net.DataSocket;
@@ -8,14 +9,13 @@ import com.iportbook.core.tools.processor.MessageProcessor;
 import java.io.IOException;
 import java.net.Socket;
 
-public abstract class ClientHandlerAbstract extends ApplicationListener {
-    protected final ClientManager cliManager;
+public abstract class ClientHandlerAbstract extends ApplicationListener implements ClientAction {
+    protected final ClientManager cliManager = ClientManager.getInstance();
     protected final DataSocket daSo;
     protected Client client;
 
-    protected ClientHandlerAbstract(Socket socket, ClientManager cliManager) throws IOException {
+    protected ClientHandlerAbstract(Socket socket) throws IOException {
         this.daSo = new DataSocket(socket);
-        this.cliManager = cliManager;
     }
 
     @Override
@@ -101,21 +101,5 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
         }
         cliManager.removeClientHandler(this);
     }
-
-    protected abstract void regis(String id, int password, int port) throws Exception;
-
-    protected abstract void conne(String id, int password) throws Exception;
-
-    protected abstract void mess(String id, int numMess) throws Exception;
-
-    protected abstract void frie(String id) throws Exception;
-
-    protected abstract void floo(String mess) throws Exception;
-
-    protected abstract void consu() throws Exception;
-
-    protected abstract void list() throws Exception;
-
-    protected abstract void iquit() throws Exception;
 
 }

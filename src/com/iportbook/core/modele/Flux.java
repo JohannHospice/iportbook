@@ -5,6 +5,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Flux implements Serializable {
+
+    public static final int FRIE = 0;
+    public static final int OKIRF = 1;
+    public static final int NOKRF = 2;
+    public static final int MESS = 3;
+    public static final int FLOO = 4;
+    public static final int PUBL = 5;
+
     private ArrayList<byte[]> partials = new ArrayList<>();
     private byte[] message;
     private byte type;

@@ -16,9 +16,9 @@ public class AppServer {
     }
 
     private void start() {
-        Logger.getGlobal().info("SERVER: start");
+        Logger.getGlobal().info("server: start");
         new Thread(serverClient).start();
-        //new Thread(serverSponsor).start();
+        new Thread(serverSponsor).start();
     }
 
     public static void main(String args[]) throws IOException {
