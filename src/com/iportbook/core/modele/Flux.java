@@ -9,6 +9,10 @@ public class Flux implements Serializable {
     private byte[] message;
     private byte type;
 
+    public Flux(byte[] message) {
+        this.message = message;
+    }
+
     public Flux(byte type) {
         this.type = type;
     }
@@ -19,7 +23,7 @@ public class Flux implements Serializable {
     }
 
     public Flux(int type) {
-        this.type = (byte) type;
+        this((byte) type);
     }
 
     public Flux(int type, byte[] message) {
@@ -55,6 +59,10 @@ public class Flux implements Serializable {
     public Flux setType(byte type) {
         this.type = type;
         return this;
+    }
+
+    public Flux setType(int type) {
+        return setType((byte) type);
     }
 
     public boolean hasPartials() {

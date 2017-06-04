@@ -1,7 +1,7 @@
 package com.iportbook.app.client;
 
 import com.iportbook.core.tools.ApplicationListener;
-import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ public class AppClient extends ApplicationListener {
     /**
      * allow you to send and receive TCP request
      */
-    private SocketHandler soHandler;
+    private DataSocket soHandler;
     private NotificationHandler notificationHandler;
 
     private AppClient(String host, int portTCP, int portUDP) throws IOException {
@@ -22,7 +22,7 @@ public class AppClient extends ApplicationListener {
         this.portTCP = portTCP;
         scanner = new Scanner(System.in);
         notificationHandler = new NotificationHandler(portUDP);
-        soHandler = new SocketHandler();
+        soHandler = new DataSocket();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class AppClient extends ApplicationListener {
     protected void onLoop() throws Exception {
         // first send
         String text = scanner.nextLine();
-        soHandler.send(textToMessageTCP(text));
+        soHandler.send(textToMessageTCP(text).build());
 
         // then receive answer
         MessageProcessor received = new MessageProcessor(soHandler.read());

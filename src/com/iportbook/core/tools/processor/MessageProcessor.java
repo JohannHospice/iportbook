@@ -4,10 +4,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * TCP message
  * TODO: theres a lot of repetition => make the code softer
  */
 public class MessageProcessor extends ByteProcessor {
     private static final byte[] CONS_PLUS = new byte[]{(byte) '+', (byte) '+', (byte) '+'};
+    private static final byte[] WHITEESCAPE = new byte[]{(byte) ' '};
     private static final int SIZE_MAX = 300;
     private static final int SIZE_IP_DIFF = 15;
     private static final int SIZE_NUM_ITEM = 3;
@@ -43,16 +45,16 @@ public class MessageProcessor extends ByteProcessor {
         return (MessageProcessor) setOffset(0).set(value);
     }
 
-    public String getId() {
-        return jump().getString(SIZE_ID);
+    public String getId() throws Exception {
+        return jump().getStringUntil(SIZE_ID, WHITEESCAPE, CONS_PLUS);
     }
 
     public MessageProcessor setId(String value) {
         return (MessageProcessor) set(' ').set(value);
     }
 
-    public String getMess() {
-        return jump().getString(SIZE_MESS);
+    public String getMess() throws Exception {
+        return jump().getStringUntil(SIZE_MESS, CONS_PLUS);
     }
 
     public MessageProcessor setMess(String value) {

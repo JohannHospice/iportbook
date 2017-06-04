@@ -1,10 +1,13 @@
 package com.iportbook.core.tools.processor;
 
-import com.iportbook.core.tools.Converter;
+import com.iportbook.core.tools.Utility;
+
+import java.util.Arrays;
 
 public class ByteProcessor {
     private final byte[] data;
     private int offset = 0;
+    private int size = 0;
 
     public ByteProcessor(byte[] data) {
         this.data = data;
@@ -20,6 +23,8 @@ public class ByteProcessor {
     }
 
     public ByteProcessor setOffset(int offset) {
+        if (offset > this.offset)
+            size = offset;
         this.offset = offset;
         return this;
     }
@@ -61,14 +66,16 @@ public class ByteProcessor {
     }
 
     public ByteProcessor setIntByLittleEndian(int value) {
-        byte[] lit = Converter.intToByteArray(value);
+        byte[] lit = Utility.intToByteArray(value);
         return set(lit[0]).set(lit[1]);
     }
 
-    public String getString(int length) {
-        String value = new String(data, offset, length);
-        offset += length;
-        return value;
+    public int getSize() {
+        return size;
+    }
+
+    public int getOffset() {
+        return offset;
     }
 
     public int getInt(int length) {
@@ -82,12 +89,27 @@ public class ByteProcessor {
     }
 
     public int getIntByLittleEndian(int length) {
-        int value = Converter.littleEndianToInt(data, offset, length);
+        int value = Utility.littleEndianToInt(data, offset, length);
         offset += length;
         return value;
     }
 
-    public String getStringUntil(byte until, int expect) throws Exception {
+    public String getString(int length) {
+        String value = new String(data, offset, length);
+        offset += length;
+        return value;
+    }
+
+    public String getStringUntil(int expect) throws Exception {
+        StringBuilder str = new StringBuilder();
+        int i = offset;
+        while (i < data.length && i - offset < expect)
+            str.append((char) data[i++]);
+        offset += str.length();
+        return str.toString();
+    }
+
+    public String getStringUntil(int expect, byte until) throws Exception {
         StringBuilder str = new StringBuilder();
         int i = offset;
         while (i < data.length) {
@@ -96,6 +118,31 @@ public class ByteProcessor {
             str.append((char) data[i++]);
         }
         if (str.length() >= expect)
+            throw new Exception();
+        offset += str.length();
+        return str.toString();
+    }
+
+    public String getStringUntil(int limit, byte[]... until) throws Exception {
+        StringBuilder str = new StringBuilder();
+        byte[][] tmp = new byte[until.length][];
+        for (int i = 0; i < until.length; i++)
+            tmp[i] = new byte[until[i].length];
+        int i = offset;
+        boolean run = true;
+        while (i < data.length && i - offset < limit && run) {
+            for (int j = 0; j < until.length; j++)
+                Utility.dequeue(tmp[j], data[i]);
+            str.append((char) data[i++]);
+            for (int j = 0; j < until.length; j++) {
+                if (Arrays.equals(tmp[j], until[j])) {
+                    str.setLength(str.length() - until[j].length);
+                    run = false;
+                    break;
+                }
+            }
+        }
+        if (str.length() > limit)
             throw new Exception();
         offset += str.length();
         return str.toString();

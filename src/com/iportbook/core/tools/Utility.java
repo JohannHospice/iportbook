@@ -3,7 +3,7 @@ package com.iportbook.core.tools;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class Converter {
+public class Utility {
     public static byte[] intToByteArray(int value) {
         ByteBuffer bb = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(value);
         bb.flip();
@@ -20,5 +20,10 @@ public class Converter {
     public static int littleEndianToInt(byte[] data) {
         ByteBuffer bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
         return bb.getInt();
+    }
+
+    public static void dequeue(byte[] data, byte value) {
+        System.arraycopy(data, 1, data, 0, data.length - 1);
+        data[data.length - 1] = value;
     }
 }

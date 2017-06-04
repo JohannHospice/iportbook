@@ -15,6 +15,12 @@ public class AppServer {
         serverSponsor = new ServerSponsor(spoPort);
     }
 
+    private void start() {
+        Logger.getGlobal().info("SERVER: start");
+        new Thread(serverClient).start();
+        //new Thread(serverSponsor).start();
+    }
+
     public static void main(String args[]) throws IOException {
         if (args.length != 2) {
             System.out.println("Usage: java ChatServer port");
@@ -22,11 +28,5 @@ public class AppServer {
         }
         AppServer appServer = new AppServer(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
         appServer.start();
-    }
-
-    private void start() {
-        Logger.getGlobal().info("SERVER: start");
-        new Thread(serverClient).start();
-        //new Thread(serverSponsor).start();
     }
 }

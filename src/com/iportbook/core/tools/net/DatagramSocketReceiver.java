@@ -40,6 +40,7 @@ public class DatagramSocketReceiver {
         byte[] data = new byte[3];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         dso.receive(packet);
+        Logger.getGlobal().info(Arrays.toString(packet.getData()));
         return new NotificationProcessor(packet.getData());
     }
 

@@ -1,82 +1,75 @@
 package com.iportbook.core.tools.net;
 
-import com.iportbook.core.tools.processor.MessageProcessor;
+import com.iportbook.core.tools.Utility;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-public class SocketHandler {
+public class DataSocket {
     private static final Logger LOGGER = Logger.getAnonymousLogger();
-    private static final int MAXLEN = 300;
+    private static final int SIZE_MESSAGE_MAX = 300;
     private final Socket socket;
-    private BufferedReader br;
-    private BufferedWriter bw;
     private DataOutputStream dos;
     private DataInputStream dis;
 
-    public SocketHandler(String host, int port) throws IOException {
+    public DataSocket(String host, int port) throws IOException {
         this.socket = new Socket(host, port);
     }
 
-    public SocketHandler(Socket socket) throws IOException {
+    public DataSocket(Socket socket) throws IOException {
         this.socket = socket;
     }
 
-    public SocketHandler() throws IOException {
+    public DataSocket() throws IOException {
         this.socket = new Socket();
-    }
-
-    private static void dequeue(byte[] data, byte value) {
-        for (int j = 0; j < data.length - 1; j++)
-            data[j] = data[j + 1];
-        data[data.length - 1] = value;
     }
 
     public void bind(String host, int port) throws IOException {
         this.socket.bind(new InetSocketAddress(host, port));
     }
 
-    public void send(String text) throws IOException {
-        LOGGER.info("send: [" + text + "]");
-        getBw().write(text + '\n');
-        getBw().flush();
-    }
-
     public void send(byte[] data) throws IOException {
         getDos().write(data);
         getDos().flush();
+        LOGGER.info("send: [" + Arrays.toString(data) + "]");
     }
 
-    public void send(MessageProcessor data) throws IOException {
-        getDos().write(data.getBytes());
+    public void send(byte[] data, int offset, int length) throws IOException {
+        getDos().write(data, offset, length);
         getDos().flush();
-    }
-
-    public String receive() throws IOException {
-        String text = getBr().readLine();
-        if (null != text)
-            LOGGER.info("receive: [" + text + "]");
-        return text;
+        LOGGER.info("send: [" + Arrays.toString(data) + "]");
     }
 
     public byte[] read() throws IOException {
-        byte[] data = new byte[MAXLEN];
+        byte[] data = new byte[SIZE_MESSAGE_MAX];
         int len = getDis().read(data);
+        if (len == -1)
+            return null;
         byte[] res = new byte[len];
         System.arraycopy(data, 0, res, 0, len);
+        LOGGER.info("receive: [" + Arrays.toString(res) + "]");
         return res;
     }
 
+    /**
+     * Write until some bytes, thoses bytes are not in the return result
+     *
+     * @param until byte[]
+     * @return byte[]
+     * @throws IOException
+     */
     public byte[] readUntil(byte[] until) throws IOException {
-        byte[] data = new byte[MAXLEN],
+        byte[] data = new byte[SIZE_MESSAGE_MAX],
                 tmp = new byte[until.length];
         byte value;
         int i = 0;
         while ((value = getDis().readByte()) != -1) {
-            dequeue(tmp, value);
+            Utility.dequeue(tmp, value);
             data[i++] = value;
             if (Arrays.equals(tmp, until))
                 break;
@@ -84,14 +77,11 @@ public class SocketHandler {
         int size = i + 1 - until.length;
         byte[] res = new byte[size];
         System.arraycopy(data, 0, res, 0, size);
+        LOGGER.info("receive: [" + Arrays.toString(res) + "]");
         return res;
     }
 
     public void close() throws IOException {
-        if (bw != null)
-            bw.close();
-        if (br != null)
-            br.close();
         if (dos != null)
             dos.close();
         if (dis != null)
@@ -101,18 +91,6 @@ public class SocketHandler {
 
     public int getLocalPort() {
         return socket.getLocalPort();
-    }
-
-    private BufferedReader getBr() throws IOException {
-        if (br == null)
-            this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        return br;
-    }
-
-    private BufferedWriter getBw() throws IOException {
-        if (bw == null)
-            this.bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        return bw;
     }
 
     private DataOutputStream getDos() throws IOException {
@@ -126,4 +104,5 @@ public class SocketHandler {
             this.dis = new DataInputStream(socket.getInputStream());
         return dis;
     }
+
 }

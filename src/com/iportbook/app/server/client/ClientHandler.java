@@ -1,9 +1,11 @@
 package com.iportbook.app.server.client;
 
+import com.iportbook.core.modele.Flux;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
 public class ClientHandler extends ClientHandlerAbstract {
 
@@ -14,102 +16,92 @@ public class ClientHandler extends ClientHandlerAbstract {
     @Override
     protected void regis(String id, int password, int port) throws Exception {
         cliManager.addClient(id, password, port);
-        soHandler.send(new MessageProcessor("WELCO").close());
+        soHandler.send(new MessageProcessor("WELCO").build());
     }
 
     @Override
     protected void conne(String id, int password) throws Exception {
         client = cliManager.getClient(id, password);
-        soHandler.send(new MessageProcessor("HELLO").close());
+        soHandler.send(new MessageProcessor("HELLO").build());
     }
 
     @Override
     protected void mess(String id, int numMess) throws Exception {
-        /*
-        Flux flux = new Flux(3, new MessageTCP(Type.SSEM, MessageTCP.Operator.CRIGHT)
-                .addArguments(client.getId(), String.valueOf(numMess)));
+        Flux flux = new Flux(3, new MessageProcessor("SSEM>").setId(client.getId()).setNumMess(numMess).build());
         for (int i = 0; i < numMess; i++) {
-            MessageTCP partial = soHandler.receiveMessage();
-            if (partial.getType() == Type.MENUM && partial.getArgumentSize() == 2) {
+            MessageProcessor partial = new MessageProcessor(soHandler.read());
+            String type = partial.getType();
+            if (Objects.equals(type, "MENUM")) {
                 //TODO: verification
-                String num = partial.getArgument(0);
-                String mess = partial.getArgument(1);
-                flux.addPartial(new MessageTCP(Type.MUNEM).addArguments(num, mess));
+                int num = partial.getNumMess();
+                String mess = partial.getMess();
+                flux.addPartial(new MessageProcessor("MUNEM").setNumMess(num).setMess(mess).build());
             }
         }
         cliManager.addFlux(id, flux);
-        */
     }
 
     @Override
     protected void floo(String mess) throws Exception {
-        /*
-        Flux flux = new Flux(4, new MessageTCP(Type.OOLF, Operator.CRIGHT)
-                .addArguments(client.getId(), mess));
+        Flux flux = new Flux(4, new MessageProcessor("OOLF>").setId(client.getId()).setMess(mess).build());
         cliManager.floodFriend(client, flux);
-        soHandler.sendMessage(new MessageTCP(Type.FLOO, Operator.CRIGHT));
-        */
+        soHandler.send(new MessageProcessor("FLOO>").build());
     }
 
     @Override
     protected void frie(String id) throws Exception {
-        /*
         try {
             if (Objects.equals(client.getId(), id) || !cliManager.hasClientById(id))
                 throw new Exception();
-            cliManager.addFlux(id, new Flux(0, new MessageTCP(Type.EIRF, Operator.CRIGHT).addArgument(client.getId())));
-            soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CRIGHT));
+            cliManager.addFlux(id, new Flux(0, new MessageProcessor("EIRF>").setId(client.getId()).build()));
+            soHandler.send(new MessageProcessor("FRIE>").build());
 
         } catch (Exception e) {
-            soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CLEFT));
+            soHandler.send(new MessageProcessor("FRIE<").build());
         }
-        */
     }
 
     @Override
     protected void consu() throws Exception {
-        /*
         Flux flux = client.popFlux();
         if (flux == null) {
-            soHandler.sendMessage(new MessageTCP(Type.NOCON));
+            soHandler.send(new MessageProcessor("NOCON").build());
         } else {
-            MessageTCP fluxMessage = flux.getMessage();
-            soHandler.sendMessage(fluxMessage);
+            soHandler.send(flux.getMessage());
+            MessageProcessor fluxMessage = new MessageProcessor(flux.getMessage());
             if (flux.hasPartials())
                 for (int i = 0; i < flux.getPartialSize(); i++)
-                    soHandler.sendMessage(flux.getPartial(i));
+                    soHandler.send(flux.getPartial(i));
             switch (fluxMessage.getType()) {
-                case EIRF:
-                    if (fluxMessage.getOperator() == Operator.CRIGHT && fluxMessage.getArgumentSize() == 1) {
-                        Flux fluxAnswer = new Flux(new MessageTCP(Type.ACKRF));
-                        String id = fluxMessage.getArgument(0);
-                        MessageTCP receiveMessage = soHandler.receiveMessage();
-                        switch (receiveMessage.getType()) {
-                            case OKIRF:
-                                cliManager.addFriendship(id, client.getId());
-                                fluxAnswer.setType(1).addPartial(new MessageTCP(Type.FRIEN).addArguments(client.getId()));
-                                break;
-                            case NOKRF:
-                                fluxAnswer.setType(2).addPartial(new MessageTCP(Type.NOFRI).addArguments(client.getId()));
-                        }
-                        cliManager.addFlux(id, fluxAnswer);
+                case "EIRF>": {
+                    Flux fluxAnswer = new Flux(new MessageProcessor("ACKRF").build());
+                    String id = fluxMessage.getId();
+                    MessageProcessor receiveMessage = new MessageProcessor(soHandler.read());
+                    switch (receiveMessage.getType()) {
+                        case "OKIRF":
+                            cliManager.addFriendship(id, client.getId());
+                            fluxAnswer.setType(1).addPartial(new MessageProcessor("FRIEN").setId(client.getId()).build());
+                            break;
+                        case "NOKRF":
+                            fluxAnswer.setType(2).addPartial(new MessageProcessor("NOFRI").setId(client.getId()).build());
                     }
+                    cliManager.addFlux(id, fluxAnswer);
+                }
             }
         }
-        */
     }
 
     @Override
     protected void list() throws Exception {
         int size = cliManager.getClientSize();
-        soHandler.send(new MessageProcessor("RLIST").setNumItem(size).close());
+        soHandler.send(new MessageProcessor("RLIST").setNumItem(size).build());
         for (int i = 0; i < size; i++)
-            soHandler.send(new MessageProcessor("LINUM").setId(cliManager.getClient(i).getId()).close());
+            soHandler.send(new MessageProcessor("LINUM").setId(cliManager.getClient(i).getId()).build());
     }
 
     @Override
     protected void iquit() throws Exception {
-        soHandler.send(new MessageProcessor("GOBYE").close());
+        soHandler.send(new MessageProcessor("GOBYE").build());
         stop();
     }
 }

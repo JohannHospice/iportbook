@@ -1,5 +1,5 @@
 import com.iportbook.core.modele.Client;
-import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.app.server.client.ServerClient;
 import junit.framework.TestCase;
 
@@ -29,7 +29,7 @@ public class ServerClientTest extends TestCase {
     public void testRegister() throws Exception {
         String id = "jojolescroc", mdp = "password", port = "5555";
 
-        SocketHandler so = new SocketHandler("localhost", PORTSERVER);
+        DataSocket so = new DataSocket("localhost", PORTSERVER);
 /*
         so.sendMessage(new MessageTCP(MessageTCP.Type.REGIS)
                 .addArgument(id)
@@ -52,7 +52,7 @@ public class ServerClientTest extends TestCase {
     }
 
     public void testLogin() throws Exception {
-        SocketHandler so = new SocketHandler("localhost", PORTSERVER);/*
+        DataSocket so = new DataSocket("localhost", PORTSERVER);/*
         so.sendMessage(new MessageTCP(MessageTCP.Type.CONNE)
                 .addArgument("bachata")
                 .addArgument("bachata"));

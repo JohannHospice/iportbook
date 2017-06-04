@@ -2,7 +2,7 @@ package com.iportbook.app.server.client;
 
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.tools.ApplicationListener;
-import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
@@ -10,11 +10,11 @@ import java.net.Socket;
 
 public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected final ClientManager cliManager;
-    protected final SocketHandler soHandler;
+    protected final DataSocket soHandler;
     protected Client client;
 
     protected ClientHandlerAbstract(Socket socket, ClientManager cliManager) throws IOException {
-        this.soHandler = new SocketHandler(socket);
+        this.soHandler = new DataSocket(socket);
         this.cliManager = cliManager;
     }
 
@@ -22,8 +22,9 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected void onStart() {
         try {
             MessageProcessor message = new MessageProcessor(soHandler.read());
+            String type = message.getType();
             String id = message.getId();
-            switch (message.getType()) {
+            switch (type) {
                 case "CONNE": {
                     int pwd = message.getPassword();
                     conne(id, pwd);
@@ -41,7 +42,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
             }
         } catch (ClientException e) {
             try {
-                soHandler.send(new MessageProcessor("GOBYE").close());
+                soHandler.send(new MessageProcessor("GOBYE").build());
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -56,18 +57,26 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected void onLoop() {
         try {
             MessageProcessor message = new MessageProcessor(soHandler.read());
-            switch (message.getType()) {
-                case "FRIE?":
-                    frie(message.getId());
+            String type = message.getType();
+            switch (type) {
+                case "FRIE?": {
+                    String id = message.getId();
+                    frie(id);
                     break;
-                case "MESS?":
-                    mess(message.getId(), message.getNumMess());
+                }
+                case "MESS?": {
+                    String id = message.getId();
+                    int numMess = message.getNumMess();
+                    mess(id, numMess);
                     break;
+                }
+                case "FLOO?": {
+                    String mess = message.getMess();
+                    floo(mess);
+                    break;
+                }
                 case "LIST?":
                     list();
-                    break;
-                case "FLOO?":
-                    floo(message.getMess());
                     break;
                 case "CONSU":
                     consu();
@@ -78,10 +87,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
                 default:
                     throw new Exception();
             }
-        } /*catch (NullPointerException e) {
-            e.printStackTrace();
-            stop();
-        } */ catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

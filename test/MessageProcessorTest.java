@@ -20,8 +20,6 @@ public class MessageProcessorTest extends TestCase {
     }
 
     public void testParse() throws Exception {
-        ;
-
         MessageProcessor message;
 
         message = new MessageProcessor(tests[1]);

@@ -1,8 +1,12 @@
 package com.iportbook.core.tools.processor;
 
+/**
+ * UDP message
+ */
 public class NotificationProcessor extends ByteProcessor {
 
     private static final int SIZE = 3;
+    private static final int LENGTH_FLUX_SIZE = 2;
     private static final int POSITION_FLUX_SIZE = 1;
     private static final int POSITION_CODE = 0;
 
@@ -29,8 +33,8 @@ public class NotificationProcessor extends ByteProcessor {
         this((byte) code);
     }
 
-    public int getFluxSize() {
-        return setOffset(POSITION_FLUX_SIZE).getIntByLittleEndian(2);
+    public void setCode(byte notificationCode) {
+        setOffset(POSITION_CODE).set(notificationCode);
     }
 
     public void setFluxSize(int fluxSize) {
@@ -41,8 +45,8 @@ public class NotificationProcessor extends ByteProcessor {
         return setOffset(POSITION_CODE).getInt();
     }
 
-    public void setCode(byte notificationCode) {
-        setOffset(POSITION_CODE).set(notificationCode);
+    public int getFluxSize() {
+        return setOffset(POSITION_FLUX_SIZE).getIntByLittleEndian(LENGTH_FLUX_SIZE);
     }
 
 }
