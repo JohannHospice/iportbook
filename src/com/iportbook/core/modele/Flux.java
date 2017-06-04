@@ -1,41 +1,41 @@
 package com.iportbook.core.modele;
 
-import com.iportbook.core.tools.message.MessageTCP;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Flux implements Serializable {
-    private ArrayList<MessageTCP> partials = new ArrayList<>();
-    private MessageTCP message;
-    private int type;
+    private ArrayList<byte[]> partials = new ArrayList<>();
+    private byte[] message;
+    private byte type;
 
-    public Flux() {
-    }
-
-    public Flux(int type) {
+    public Flux(byte type) {
         this.type = type;
     }
 
-    public Flux(MessageTCP message) {
-        this.message = message;
-    }
-
-    public Flux(int type, MessageTCP message) {
+    public Flux(byte type, byte[] message) {
         this(type);
         this.message = message;
     }
 
-    public MessageTCP getMessage() {
+    public Flux(int type) {
+        this.type = (byte) type;
+    }
+
+    public Flux(int type, byte[] message) {
+        this((byte) type, message);
+    }
+
+    public byte[] getMessage() {
         return message;
     }
 
-    public Flux setMessage(MessageTCP message) {
+    public Flux setMessage(byte[] message) {
         this.message = message;
         return this;
     }
 
-    public Flux addPartial(MessageTCP message) {
+    public Flux addPartial(byte[] message) {
         partials.add(message);
         return this;
     }
@@ -44,15 +44,15 @@ public class Flux implements Serializable {
         return partials.size();
     }
 
-    public MessageTCP getPartial(int i) {
+    public byte[] getPartial(int i) {
         return partials.get(i);
     }
 
-    public int getType() {
+    public byte getType() {
         return type;
     }
 
-    public Flux setType(int type) {
+    public Flux setType(byte type) {
         this.type = type;
         return this;
     }

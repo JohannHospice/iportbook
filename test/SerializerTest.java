@@ -1,7 +1,7 @@
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.modele.Flux;
 import com.iportbook.core.tools.io.Serializer;
-import com.iportbook.core.tools.message.MessageTCP;
+import com.iportbook.core.tools.processor.MessageProcessor;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -17,7 +17,9 @@ public class SerializerTest extends TestCase {
         Client cli = new Client("choco", 45, 9879);
         cli1.addFriendsId(cli);
         cli.addFriendsId(cli1);
-        cli.addFluxNotify(new Flux(3, new MessageTCP(MessageTCP.Type.FRIEN, MessageTCP.Operator.CRIGHT).addArguments("elds", "jkhj", "jklj")));
+        cli.addFlux(3, new MessageProcessor("FRIEN>").set("fds").getBytes());
+        Flux fl = new Flux(3, new MessageProcessor("FRIEN>").setId("elds").setId("jklj").getBytes());
+        cli.addFluxNotify(fl);
         data.add(cli1);
         data.add(cli);
     }

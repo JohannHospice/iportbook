@@ -1,13 +1,9 @@
 package com.iportbook.app.server.client;
 
-import com.iportbook.core.modele.Flux;
-import com.iportbook.core.tools.message.MessageTCP;
+import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Objects;
-
-import static com.iportbook.core.tools.message.MessageTCP.*;
 
 public class ClientHandler extends ClientHandlerAbstract {
 
@@ -18,17 +14,18 @@ public class ClientHandler extends ClientHandlerAbstract {
     @Override
     protected void regis(String id, int password, int port) throws Exception {
         cliManager.addClient(id, password, port);
-        soHandler.sendMessage(new MessageTCP(Type.WELCO));
+        soHandler.send(new MessageProcessor("WELCO").close());
     }
 
     @Override
     protected void conne(String id, int password) throws Exception {
         client = cliManager.getClient(id, password);
-        soHandler.sendMessage(new MessageTCP(Type.HELLO));
+        soHandler.send(new MessageProcessor("HELLO").close());
     }
 
     @Override
     protected void mess(String id, int numMess) throws Exception {
+        /*
         Flux flux = new Flux(3, new MessageTCP(Type.SSEM, MessageTCP.Operator.CRIGHT)
                 .addArguments(client.getId(), String.valueOf(numMess)));
         for (int i = 0; i < numMess; i++) {
@@ -41,18 +38,22 @@ public class ClientHandler extends ClientHandlerAbstract {
             }
         }
         cliManager.addFlux(id, flux);
+        */
     }
 
     @Override
     protected void floo(String mess) throws Exception {
+        /*
         Flux flux = new Flux(4, new MessageTCP(Type.OOLF, Operator.CRIGHT)
                 .addArguments(client.getId(), mess));
         cliManager.floodFriend(client, flux);
         soHandler.sendMessage(new MessageTCP(Type.FLOO, Operator.CRIGHT));
+        */
     }
 
     @Override
     protected void frie(String id) throws Exception {
+        /*
         try {
             if (Objects.equals(client.getId(), id) || !cliManager.hasClientById(id))
                 throw new Exception();
@@ -62,10 +63,12 @@ public class ClientHandler extends ClientHandlerAbstract {
         } catch (Exception e) {
             soHandler.sendMessage(new MessageTCP(Type.FRIE, Operator.CLEFT));
         }
+        */
     }
 
     @Override
     protected void consu() throws Exception {
+        /*
         Flux flux = client.popFlux();
         if (flux == null) {
             soHandler.sendMessage(new MessageTCP(Type.NOCON));
@@ -93,20 +96,20 @@ public class ClientHandler extends ClientHandlerAbstract {
                     }
             }
         }
+        */
     }
 
     @Override
     protected void list() throws Exception {
         int size = cliManager.getClientSize();
-        soHandler.sendMessage(new MessageTCP(Type.RLIST).addArgument(String.valueOf(size)));
-        for (int i = 0; i < size; i++) {
-            soHandler.sendMessage(new MessageTCP(Type.LINUM).addArgument(cliManager.getClient(i).getId()));
-        }
+        soHandler.send(new MessageProcessor("RLIST").setNumItem(size).close());
+        for (int i = 0; i < size; i++)
+            soHandler.send(new MessageProcessor("LINUM").setId(cliManager.getClient(i).getId()).close());
     }
 
     @Override
     protected void iquit() throws Exception {
-        soHandler.sendMessage(new MessageTCP(Type.GOBYE));
+        soHandler.send(new MessageProcessor("GOBYE").close());
         stop();
     }
 }

@@ -1,32 +1,37 @@
 package com.iportbook.app.client;
 
 import com.iportbook.core.tools.ApplicationListener;
-import com.iportbook.core.tools.message.MessageTCP;
 import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.util.Scanner;
 
 public class AppClient extends ApplicationListener {
-    private final int portTCP;
-    private final int portUDP;
-    private final String host;
     private final Scanner scanner;
+    private final String host;
+    private int portTCP;
+    /**
+     * allow you to send and receive TCP request
+     */
     private SocketHandler soHandler;
+    private NotificationHandler notificationHandler;
 
     private AppClient(String host, int portTCP, int portUDP) throws IOException {
         this.host = host;
         this.portTCP = portTCP;
-        this.portUDP = portUDP;
         scanner = new Scanner(System.in);
+        notificationHandler = new NotificationHandler(portUDP);
+        soHandler = new SocketHandler();
     }
 
     @Override
     protected void onStart() throws Exception {
         // run udp notification handler
-        new Thread(new NotificationHandler(portUDP)).start();
+        new Thread(notificationHandler).start();
         // run tcp
-        soHandler = new SocketHandler(host, portTCP);
+        soHandler.bind(host, portTCP);
+        portTCP = soHandler.getLocalPort();
 
         //conne regi
         System.out.println("connection: 0, register: 1");
@@ -44,43 +49,11 @@ public class AppClient extends ApplicationListener {
     protected void onLoop() throws Exception {
         // first send
         String text = scanner.nextLine();
-        soHandler.sendMessage(textToMessageTCP(text));
+        soHandler.send(textToMessageTCP(text));
 
         // then receive answer
-        MessageTCP received = soHandler.receiveMessage();
+        MessageProcessor received = new MessageProcessor(soHandler.read());
         switch (received.getType()) {
-            case WELCO:
-                break;
-            case GOBYE:
-                break;
-            case HELLO:
-                break;
-            case SSEM:
-                break;
-            case MUNEM:
-                break;
-            case OOLF:
-                break;
-            case EIRF:
-                break;
-            case OKIRF:
-                break;
-            case NOKRF:
-                break;
-            case ACKRF:
-                break;
-            case FRIEN:
-                break;
-            case NOFRI:
-                break;
-            case LBUP:
-                break;
-            case NOCON:
-                break;
-            case PUBL:
-                break;
-            case IQUIT:
-                break;
         }
     }
 
@@ -93,16 +66,18 @@ public class AppClient extends ApplicationListener {
     /**
      * get MessageTCP object by raw text
      * transformation has to be determine there
+     *
      * @param text String
      * @return MessageTCP
      */
-    private MessageTCP textToMessageTCP(String text) {
+    private MessageProcessor textToMessageTCP(String text) {
         // process an easiest protocol for text treatment
         return null;
     }
 
     /**
      * get next text wrote on terminal with a specific pattern(regex)
+     *
      * @param pattern String
      * @return String
      */

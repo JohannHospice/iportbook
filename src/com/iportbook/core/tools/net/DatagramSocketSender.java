@@ -1,6 +1,6 @@
 package com.iportbook.core.tools.net;
 
-import com.iportbook.core.tools.message.MessageUDP;
+import com.iportbook.core.tools.processor.NotificationProcessor;
 
 import java.io.IOException;
 import java.net.*;
@@ -45,9 +45,10 @@ public class DatagramSocketSender {
         LOGGER.info("[" + Arrays.toString(data) + "]");
     }
 
-    public void sendMessage(MessageUDP message) throws IOException {
+    public void sendMessage(NotificationProcessor message) throws IOException {
         send(message.getBytes());
     }
+
     public void close() {
         dso.close();
     }

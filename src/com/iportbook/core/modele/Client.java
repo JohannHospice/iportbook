@@ -1,7 +1,7 @@
 package com.iportbook.core.modele;
 
-import com.iportbook.core.tools.message.MessageUDP;
 import com.iportbook.core.tools.net.DatagramSocketSender;
+import com.iportbook.core.tools.processor.NotificationProcessor;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -31,7 +31,7 @@ public class Client implements Serializable {
     public void addFluxNotify(Flux flux) throws IOException {
         addFlux(flux);
         DatagramSocketSender notifier = new DatagramSocketSender(getPortUDP());
-        notifier.sendMessage(new MessageUDP(flux.getType(), getFluxSize()));
+        notifier.sendMessage(new NotificationProcessor(flux.getType(), getFluxSize()));
         notifier.close();
     }
 
@@ -48,20 +48,12 @@ public class Client implements Serializable {
         this.flux.remove(flux);
     }
 
-    public void setPassword(int password) {
-        this.password = password;
-    }
-
-    public void setPortUDP(int portUDP) {
-        this.portUDP = portUDP;
+    public String getId() {
+        return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public ArrayList<Client> getFriends() {
@@ -72,8 +64,16 @@ public class Client implements Serializable {
         return password;
     }
 
+    public void setPassword(int password) {
+        this.password = password;
+    }
+
     public int getPortUDP() {
         return portUDP;
+    }
+
+    public void setPortUDP(int portUDP) {
+        this.portUDP = portUDP;
     }
 
     public Flux getFlux(int i) {
@@ -82,5 +82,9 @@ public class Client implements Serializable {
 
     public int getFluxSize() {
         return flux.size();
+    }
+
+    public void addFlux(int type, byte[] message) throws IOException {
+        addFlux(new Flux(type, message));
     }
 }

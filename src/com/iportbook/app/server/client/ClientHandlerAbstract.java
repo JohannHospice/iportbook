@@ -2,14 +2,11 @@ package com.iportbook.app.server.client;
 
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.tools.ApplicationListener;
-import com.iportbook.core.tools.Tools;
-import com.iportbook.core.tools.message.MessageTCP;
 import com.iportbook.core.tools.net.SocketHandler;
+import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.net.Socket;
-
-import static com.iportbook.core.tools.message.MessageTCP.Type;
 
 public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected final ClientManager cliManager;
@@ -24,30 +21,27 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onStart() {
         try {
-            MessageTCP message = soHandler.receiveMessage();
+            MessageProcessor message = new MessageProcessor(soHandler.read());
+            String id = message.getId();
             switch (message.getType()) {
-                case CONNE:
-                    if (message.getArgumentSize() != 2)
-                        throw new Exception();
-                    conne(
-                            message.getArgument(0),
-                            Tools.byteArrayToInt(message.getArgument(1).getBytes()));
+                case "CONNE": {
+                    int pwd = message.getPassword();
+                    conne(id, pwd);
                     break;
-                case REGIS:
-                    if (message.getArgumentSize() != 3)
-                        throw new Exception();
-                    regis(
-                            message.getArgument(0),
-                            Tools.byteArrayToInt(message.getArgument(2).getBytes()),
-                            Integer.parseInt(message.getArgument(1)));
+                }
+                case "REGIS": {
+                    int port = message.getPort();
+                    int pwd = message.getPassword();
+                    regis(id, pwd, port);
                     break;
+                }
                 default:
                     stop();
                     break;
             }
         } catch (ClientException e) {
             try {
-                soHandler.sendMessage(new MessageTCP(Type.GOBYE));
+                soHandler.send(new MessageProcessor("GOBYE").close());
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -61,37 +55,33 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onLoop() {
         try {
-            MessageTCP message = soHandler.receiveMessage();
+            MessageProcessor message = new MessageProcessor(soHandler.read());
             switch (message.getType()) {
-                case FRIE:
-                    if (message.getArgumentSize() == 1 && message.getOperator() == MessageTCP.Operator.ASK)
-                        frie(message.getArgument(0));
+                case "FRIE?":
+                    frie(message.getId());
                     break;
-                case MESS:
-                    if (message.getOperator() == MessageTCP.Operator.ASK && message.getArgumentSize() == 2)
-                        mess(message.getArgument(0), Integer.parseInt(message.getArgument(1)));
+                case "MESS?":
+                    mess(message.getId(), message.getNumMess());
                     break;
-                case LIST:
-                    if (message.getOperator() == MessageTCP.Operator.ASK)
-                        list();
+                case "LIST?":
+                    list();
                     break;
-                case FLOO:
-                    if (message.getOperator() == MessageTCP.Operator.ASK)
-                        floo(message.getArgument(0));
+                case "FLOO?":
+                    floo(message.getMess());
                     break;
-                case CONSU:
+                case "CONSU":
                     consu();
                     break;
-                case IQUIT:
+                case "IQUIT":
                     iquit();
                     break;
                 default:
                     throw new Exception();
             }
-        } catch (NullPointerException e) {
+        } /*catch (NullPointerException e) {
             e.printStackTrace();
             stop();
-        } catch (Exception e) {
+        } */ catch (Exception e) {
             e.printStackTrace();
         }
     }

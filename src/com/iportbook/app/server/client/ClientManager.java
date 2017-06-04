@@ -6,7 +6,10 @@ import com.iportbook.core.tools.io.Serializer;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
 
 public class ClientManager {
     private ArrayList<Client> clients = new ArrayList<>();

@@ -1,10 +1,10 @@
-import com.iportbook.core.tools.Tools;
+import com.iportbook.core.tools.Converter;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
 
-public class ToolsTest extends TestCase {
+public class ConverterTest extends TestCase {
     private byte[][] values = {
             new byte[]{(byte) 255, (byte) 255, 0, 0},
             new byte[]{(byte) 0, (byte) 0, 0, 0},
@@ -16,11 +16,11 @@ public class ToolsTest extends TestCase {
 
     public void testByteArrayToInt() throws Exception {
         for (int i = 0; i < keys.length; i++)
-            Assert.assertEquals(keys[i], Tools.byteArrayToInt(values[i]));
+            Assert.assertEquals(keys[i], Converter.littleEndianToInt(values[i]));
     }
 
     public void testIntToByteArray() throws Exception {
         for (int i = 0; i < keys.length; i++)
-            Assert.assertEquals(Arrays.toString(values[i]), Arrays.toString(Tools.intToByteArray(keys[i])));
+            Assert.assertEquals(Arrays.toString(values[i]), Arrays.toString(Converter.intToByteArray(keys[i])));
     }
 }

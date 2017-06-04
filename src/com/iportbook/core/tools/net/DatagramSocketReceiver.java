@@ -1,6 +1,6 @@
 package com.iportbook.core.tools.net;
 
-import com.iportbook.core.tools.message.MessageUDP;
+import com.iportbook.core.tools.processor.NotificationProcessor;
 
 import java.io.IOException;
 import java.net.*;
@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class DatagramSocketReceiver {
-    private DatagramSocket dso;
     private final static int LENGTH = 200;
+    private DatagramSocket dso;
 
     public DatagramSocketReceiver() throws UnknownHostException, SocketException {
         this.dso = new DatagramSocket();
@@ -23,6 +23,10 @@ public class DatagramSocketReceiver {
         dso.bind(new InetSocketAddress(sourcePort));
     }
 
+    public int getLocalPort() {
+        return dso.getLocalPort();
+    }
+
     public String receive() throws IOException {
         byte[] data = new byte[LENGTH];
         DatagramPacket packet = new DatagramPacket(data, data.length);
@@ -32,11 +36,11 @@ public class DatagramSocketReceiver {
         return str;
     }
 
-    public MessageUDP receiveMessageUDP() throws IOException {
+    public NotificationProcessor receiveMessageUDP() throws IOException {
         byte[] data = new byte[3];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         dso.receive(packet);
-        return new MessageUDP(packet.getData());
+        return new NotificationProcessor(packet.getData());
     }
 
     public void close() {
