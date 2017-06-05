@@ -8,10 +8,16 @@ import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class AppSponsor extends ApplicationListener {
     private static final int SIZE_PROM = 300;
     private static final int SIZE_PUBL = 200;
+
+    static {
+        Logger.getGlobal().setUseParentHandlers(false);
+    }
+
     private final String hostTCP;
     private final String ipDiff;
     private final int portTCP;
@@ -46,34 +52,24 @@ public class AppSponsor extends ApplicationListener {
     protected void onStart() throws Exception {
         daSo = new DataSocket(hostTCP, portTCP);
         udpSocket = new DatagramSocketSender(portDiff, ipDiff);
+        System.out.println();
     }
 
     @Override
     protected void onLoop() throws Exception {
-        switch (termScanner.ask("promotion(0), publicite(1), quit(2)", "^(0|1|2)$").charAt(0)) {
-            case '0': {
-                String mess = termScanner.ask("message: ", ".{0," + SIZE_PROM + "}");
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("PROM ").append(mess);
-                for (int i = 0; i < SIZE_PROM - mess.length(); i++)
-                    stringBuilder.append('#');
-                udpSocket.send(stringBuilder.toString());
+        switch (termScanner.askNext("Que voulez vous faire:\n prom - Promotion\n publ - Publicite\n quit - quit\nVotre choix: ", "^(prom|publ|quit)$")) {
+            case "prom": {
+                String mess = termScanner.askNextLine("\nSaisissez le message de promotion:\n> ", SIZE_PROM);
+                prom(mess);
                 break;
             }
-            case '1': {
-                String mess = termScanner.ask("message: ", ".{0," + SIZE_PUBL + "}");
-                daSo.send(new MessageProcessor("PUBL?")
-                        .setIpDiff(udpSocket.getHost())
-                        .setPort(udpSocket.getPort())
-                        .setMess(mess)
-                        .build());
-                MessageProcessor answer = new MessageProcessor(daSo.read());
-                String type = answer.getType();
-                if (Objects.equals(type, "PUBL>"))
-                    System.out.println("La publication à bien été retransmise");
+            case "publ": {
+                String mess = termScanner.askNextLine("\nSaisissez le message de publicité:\n> ", SIZE_PUBL);
+                publ(udpSocket.getHost(), udpSocket.getPort(), mess);
                 break;
             }
-            case '2':
+            case "quit":
+                System.out.println();
                 stop();
         }
     }
@@ -82,5 +78,26 @@ public class AppSponsor extends ApplicationListener {
     protected void onEnd() throws Exception {
         daSo.close();
         udpSocket.close();
+    }
+
+    private void prom(String mess) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("PROM ").append(mess);
+        for (int i = 0; i < SIZE_PROM - mess.length(); i++)
+            stringBuilder.append('#');
+        udpSocket.send(stringBuilder.toString());
+        System.out.println("+ La promotion à bien été retransmise\n");
+    }
+
+    private void publ(String host, int port, String mess) throws Exception {
+        daSo.send(new MessageProcessor("PUBL?")
+                .setIpDiff(host)
+                .setPort(port)
+                .setMess(mess)
+                .build());
+        MessageProcessor answer = new MessageProcessor(daSo.read());
+        String type = answer.getType();
+        if (Objects.equals(type, "PUBL>"))
+            System.out.println("+ La publication à bien été retransmise\n");
     }
 }

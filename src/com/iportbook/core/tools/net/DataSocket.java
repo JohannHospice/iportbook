@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class DataSocket {
-    private static final Logger LOGGER = Logger.getAnonymousLogger();
+    private static final Logger LOGGER = Logger.getGlobal();
     private static final int SIZE_MESSAGE_MAX = 300;
     private final Socket socket;
     private DataOutputStream dos;
@@ -32,13 +32,13 @@ public class DataSocket {
     public void send(byte[] data) throws IOException {
         getDos().write(data);
         getDos().flush();
-        LOGGER.info("send: [" + Arrays.toString(data) + "]");
+        Logger.getGlobal().info("send: [" + Arrays.toString(data) + "]");
     }
 
     public void send(byte[] data, int offset, int length) throws IOException {
         getDos().write(data, offset, length);
         getDos().flush();
-        LOGGER.info("send: [" + Arrays.toString(data) + "]");
+        Logger.getGlobal().info("send: [" + Arrays.toString(data) + "]");
     }
 
     public byte[] read() throws IOException {
@@ -48,7 +48,7 @@ public class DataSocket {
             return null;
         byte[] res = new byte[len];
         System.arraycopy(data, 0, res, 0, len);
-        LOGGER.info("receive: [" + Arrays.toString(res) + "]");
+        Logger.getGlobal().info("receive: [" + Arrays.toString(res) + "]");
         return res;
     }
 
@@ -73,7 +73,7 @@ public class DataSocket {
         int size = i + 1 - until.length;
         byte[] res = new byte[size];
         System.arraycopy(data, 0, res, 0, size);
-        LOGGER.info("receive: [" + Arrays.toString(res) + "]");
+        Logger.getGlobal().info("receive: [" + Arrays.toString(res) + "]");
         return res;
     }
 

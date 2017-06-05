@@ -11,7 +11,6 @@ public class DatagramSocketSender {
     private final int targetPort;
     private final InetAddress address;
     private DatagramSocket dso;
-    private Logger LOGGER = Logger.getAnonymousLogger();
 
     /**
      * @param targetPort int
@@ -42,7 +41,7 @@ public class DatagramSocketSender {
 
     public void send(byte[] data) throws IOException {
         dso.send(new DatagramPacket(data, data.length, address, targetPort));
-        LOGGER.info("[" + Arrays.toString(data) + "]");
+        Logger.getGlobal().info("[" + Arrays.toString(data) + "]");
     }
 
     public void sendMessage(NotificationProcessor message) throws IOException {

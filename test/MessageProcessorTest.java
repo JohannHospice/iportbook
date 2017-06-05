@@ -10,6 +10,7 @@ public class MessageProcessorTest extends TestCase {
             "FRIE? alice123+++",
             "EIRF> bob12345+++",
             "CONSU+++",
+            "PUBL? 225.10.12.4#### 0898 une publicitee pas interressante+++"
     };
 
     byte[] concat(byte[] a1, byte[] a2) {
@@ -21,6 +22,12 @@ public class MessageProcessorTest extends TestCase {
 
     public void testParse() throws Exception {
         MessageProcessor message;
+
+        message = new MessageProcessor(tests[4]);
+        assertEquals("PUBL?", message.getType());
+        assertEquals("225.10.12.4", message.getIpDiff());
+        assertEquals(898, message.getPort());
+        assertEquals("une publicitee pas interressante", message.getMess());
 
         message = new MessageProcessor(tests[1]);
         assertEquals("FRIE?", message.getType());
@@ -38,6 +45,10 @@ public class MessageProcessorTest extends TestCase {
 
     public void testCompose() throws Exception {
         assertEquals(
+                Arrays.toString(tests[4].getBytes()),
+                Arrays.toString(new MessageProcessor("PUBL?").setIpDiff("225.10.12.4").setPort(898).setMess("une publicitée pas interressante").build()));
+
+        assertEquals(
                 Arrays.toString("FRIE< f4ds56f+++".getBytes()),
                 Arrays.toString(new MessageProcessor("FRIE<").setId("f4ds56f").build()));
 
@@ -45,9 +56,8 @@ public class MessageProcessorTest extends TestCase {
                 Arrays.toString("CONSU+++".getBytes()),
                 Arrays.toString(new MessageProcessor("CONSU").build()));
 
-        byte[] test = concat("CONNE f4ds56f ".getBytes(), concat(new byte[]{10, 2}, "+++".getBytes()));
         assertEquals(
-                Arrays.toString(test),
+                Arrays.toString(concat("CONNE f4ds56f ".getBytes(), concat(new byte[]{10, 2}, "+++".getBytes()))),
                 Arrays.toString(new MessageProcessor("CONNE").setId("f4ds56f").setPassword(522).build()));
     }
 }

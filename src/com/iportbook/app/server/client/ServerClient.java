@@ -4,6 +4,7 @@ import com.iportbook.app.server.ServerListener;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 
 public class ServerClient extends ServerListener {
@@ -26,7 +27,7 @@ public class ServerClient extends ServerListener {
     @Override
     protected void onEnd() {
         cliManager.stop();
-        LOGGER.info("shutdown");
+        Logger.getGlobal().info("shutdown");
         super.onEnd();
     }
 

@@ -5,6 +5,7 @@ import com.iportbook.core.tools.ApplicationListener;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public abstract class ServerListener extends ApplicationListener {
     private ServerSocket serverSocket;
@@ -17,14 +18,14 @@ public abstract class ServerListener extends ApplicationListener {
     @Override
     protected void onStart() throws IOException {
         serverSocket = new ServerSocket(port);
-        LOGGER.info("listen: " + serverSocket.toString());
+        Logger.getGlobal().info("listen: " + serverSocket.toString());
     }
 
     @Override
     protected void onLoop() {
         try {
             Socket so = serverSocket.accept();
-            LOGGER.info("accept: " + so);
+            Logger.getGlobal().info("accept: " + so);
             onAccept(so);
         } catch (IOException e) {
             e.printStackTrace();
@@ -38,7 +39,7 @@ public abstract class ServerListener extends ApplicationListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LOGGER.info("shutdown");
+        Logger.getGlobal().info("shutdown");
     }
 
     protected abstract void onAccept(Socket accept) throws IOException;
