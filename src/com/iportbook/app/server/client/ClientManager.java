@@ -51,17 +51,14 @@ public class ClientManager {
         addFlux(getClient(id), flux);
     }
 
-    public void addFluxToAll(Flux flux) throws Exception {
-        for (Client cli : clients)
-            addFlux(cli, flux);
-    }
-
     public void addFluxToAll(int type, byte[] data) throws Exception {
-        addFluxToAll(new Flux(type, data));
+        for (Client cli : clients)
+            addFlux(cli, new Flux(type, data));
     }
 
     public void floodFriend(Client client, Flux flux) throws ClientException, IOException {
-        floodFriend(client, flux, new ArrayList<>());
+        for (Client friend : client.getFriends())
+            floodFriend(friend, flux, new ArrayList<>());
         try {
             store();
         } catch (IOException e) {
@@ -102,8 +99,10 @@ public class ClientManager {
         }
     }
 
-    public void addClient(String id, int password, int udpPort) throws ClientException {
-        addClient(new Client(id, password, udpPort));
+    public Client addClient(String id, int password, int udpPort) throws ClientException {
+        Client cli = new Client(id, password, udpPort);
+        addClient(cli);
+        return cli;
     }
 
     public void addClientHandler(Socket socket) throws IOException {

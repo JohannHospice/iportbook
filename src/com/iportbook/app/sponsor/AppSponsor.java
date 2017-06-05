@@ -36,7 +36,7 @@ public class AppSponsor extends ApplicationListener {
 
     public static void main(String[] args) throws IOException {
         if (args.length != 3) {
-            System.out.println("Usage: need 3 arguments");
+            System.out.println("Usage: need 3 arguments <portServer> <ipDiff> <portDiff>");
             return;
         }
         final String hostServer = "localhost";

@@ -1,6 +1,5 @@
 package com.iportbook.app.server.client;
 
-import com.iportbook.app.ClientAction;
 import com.iportbook.core.modele.Client;
 import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.net.DataSocket;
@@ -10,7 +9,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
-public abstract class ClientHandlerAbstract extends ApplicationListener implements ClientAction {
+public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected final ClientManager cliManager = ClientManager.getInstance();
     protected final DataSocket daSo;
     protected Client client;
@@ -41,15 +40,12 @@ public abstract class ClientHandlerAbstract extends ApplicationListener implemen
                     stop();
                     break;
             }
-        } catch (ClientException e) {
+        } catch (Exception e) {
             try {
                 daSo.send(new MessageProcessor("GOBYE").build());
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-            stop();
-        } catch (Exception e) {
-            e.printStackTrace();
             stop();
         }
     }
@@ -106,4 +102,19 @@ public abstract class ClientHandlerAbstract extends ApplicationListener implemen
         cliManager.removeClientHandler(this);
     }
 
+    abstract void regis(String id, int password, int port) throws Exception;
+
+    abstract void conne(String id, int password) throws Exception;
+
+    abstract void mess(String id, int numMess) throws Exception;
+
+    abstract void frie(String id) throws Exception;
+
+    abstract void floo(String mess) throws Exception;
+
+    abstract void consu() throws Exception;
+
+    abstract void list() throws Exception;
+
+    abstract void iquit() throws Exception;
 }

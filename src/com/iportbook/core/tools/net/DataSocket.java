@@ -1,6 +1,7 @@
 package com.iportbook.core.tools.net;
 
 import com.iportbook.core.tools.Utility;
+import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,10 +24,6 @@ public class DataSocket {
 
     public DataSocket(Socket socket) throws IOException {
         this.socket = socket;
-    }
-
-    public void bind(String host, int port) throws IOException {
-        this.socket.bind(new InetSocketAddress(host, port));
     }
 
     public void send(byte[] data) throws IOException {
@@ -52,6 +49,10 @@ public class DataSocket {
         return res;
     }
 
+    public MessageProcessor readMessageProcessor() throws IOException {
+        return new MessageProcessor(readUntil(new byte[]{'+', '+', '+'}));
+    }
+
     /**
      * Write until some bytes, thoses bytes are not in the return result
      *
@@ -70,9 +71,8 @@ public class DataSocket {
             if (Arrays.equals(tmp, until))
                 break;
         }
-        int size = i + 1 - until.length;
-        byte[] res = new byte[size];
-        System.arraycopy(data, 0, res, 0, size);
+        byte[] res = new byte[i];
+        System.arraycopy(data, 0, res, 0, i);
         Logger.getGlobal().info("receive: [" + Arrays.toString(res) + "]");
         return res;
     }

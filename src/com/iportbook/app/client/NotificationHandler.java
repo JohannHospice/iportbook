@@ -24,28 +24,32 @@ public class NotificationHandler extends ApplicationListener {
     @Override
     protected void onLoop() throws IOException {
         NotificationProcessor notificationProcessor = datagramSocketReceiver.receiveMessageUDP();
-        System.out.println("nb notif: " + notificationProcessor.getFluxSize());
-        //TODO: different print switch notif
-        switch (notificationProcessor.getCode()) {
+        int fluxSize = notificationProcessor.getFluxSize();
+        int code = notificationProcessor.getCode();
+
+        StringBuilder builder = new StringBuilder("(" + fluxSize + ") ");
+        switch (code) {
             case Flux.FLOO:
-            	System.out.println("Recu un flood");
+                builder.append("Innondation");
                 break;
             case Flux.FRIE:
-            	System.out.println("Recu une requete d'ami");
+                builder.append("Requete d'ami");
                 break;
             case Flux.MESS:
-            	System.out.println("Recu un message prive");
+                builder.append("Message prive");
                 break;
             case Flux.NOKRF:
-            	System.out.println("Requete d'ami refusee");
+                builder.append("Requete d'ami refusee");
                 break;
             case Flux.OKIRF:
-            	System.out.println("Requete d'ami acceptee");
+                builder.append("Requete d'ami acceptee");
                 break;
             case Flux.PUBL:
-            	System.out.println("Recu une publicite");
+                builder.append("Publicite");
                 break;
         }
+        builder.append("\n> ");
+        System.out.print(builder.toString());
     }
 
     @Override

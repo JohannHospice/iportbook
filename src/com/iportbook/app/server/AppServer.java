@@ -21,7 +21,7 @@ public class AppServer {
 
     public static void main(String args[]) throws IOException {
         if (args.length != 2) {
-            System.out.println("Usage: need 2 arguments");
+            System.err.println("Usage: need 2 arguments <portClient> <portSponsor>");
             return;
         }
         final int portCli = Integer.parseInt(args[0]);

@@ -65,7 +65,6 @@ public class ServerSponsor extends ServerListener {
         private void publ(String ipDiff, int port, String mess) throws Exception {
             ClientManager.getInstance().addFluxToAll(Flux.PUBL, new MessageProcessor("LBUP>").setIpDiff(ipDiff).setPort(port).setMess(mess).build());
             daSo.send(new MessageProcessor("PUBL>").build());
-
         }
     }
 }

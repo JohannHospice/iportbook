@@ -15,31 +15,38 @@ public class ClientHandler extends ClientHandlerAbstract {
 
     @Override
     public void regis(String id, int password, int port) throws Exception {
-        cliManager.addClient(id, password, port);
-        daSo.send(new MessageProcessor("WELCO").build());
+            client = cliManager.addClient(id, password, port);
+            daSo.send(new MessageProcessor("WELCO").build());
     }
 
     @Override
     public void conne(String id, int password) throws Exception {
-        client = cliManager.getClient(id, password);
-        daSo.send(new MessageProcessor("HELLO").build());
+            client = cliManager.getClient(id, password);
+            daSo.send(new MessageProcessor("HELLO").build());
     }
 
     @Override
     public void mess(String id, int numMess) throws Exception {
-        Flux flux = new Flux(3, new MessageProcessor("SSEM>").setId(client.getId()).setNumMess(numMess).build());
-        for (int i = 0; i < numMess; i++) {
-            MessageProcessor partial = new MessageProcessor(daSo.read());
-            String type = partial.getType();
-            if (Objects.equals(type, "MENUM")) {
-                //TODO: verification
-                int num = partial.getNumMess();
-                String mess = partial.getMess();
-                flux.addPartial(new MessageProcessor("MUNEM").setNumMess(num).setMess(mess).build());
+        try {
+            Flux flux = new Flux(3, new MessageProcessor("SSEM>").setId(client.getId()).setNumMess(numMess).build());
+            for (int i = 0; i < numMess; i++) {
+                MessageProcessor partial = new MessageProcessor(daSo.read());
+                String type = partial.getType();
+                if (Objects.equals(type, "MENUM")) {
+                    //TODO: verification
+                    int num = partial.getNumMess();
+                    String mess = partial.getMess();
+                    flux.addPartial(new MessageProcessor("MUNEM").setNumMess(num).setMess(mess).build());
+                }
             }
+            cliManager.addFlux(id, flux);
+            daSo.send(new MessageProcessor("MESS>").build());
+        } catch (Exception e) {
+            daSo.send(new MessageProcessor("MESS<").build());
+            e.printStackTrace();
         }
-        cliManager.addFlux(id, flux);
     }
+
 
     @Override
     public void floo(String mess) throws Exception {
@@ -55,7 +62,6 @@ public class ClientHandler extends ClientHandlerAbstract {
                 throw new Exception();
             cliManager.addFlux(id, new Flux(Flux.FRIE, new MessageProcessor("EIRF>").setId(client.getId()).build()));
             daSo.send(new MessageProcessor("FRIE>").build());
-
         } catch (Exception e) {
             daSo.send(new MessageProcessor("FRIE<").build());
         }
@@ -79,16 +85,15 @@ public class ClientHandler extends ClientHandlerAbstract {
                     String type = receiveMessage.getType();
                     switch (type) {
                         case "OKIRF": {
-                            daSo.send(new MessageProcessor("ACKRF").build());
                             cliManager.addFriendship(id, client.getId());
                             cliManager.addFlux(id, new Flux(Flux.OKIRF, new MessageProcessor("FRIEN").setId(client.getId()).build()));
                             break;
                         }
                         case "NOKRF": {
-                            daSo.send(new MessageProcessor("ACKRF").build());
                             cliManager.addFlux(id, new Flux(Flux.NOKRF, new MessageProcessor("NOFRI").setId(client.getId()).build()));
                         }
                     }
+                    daSo.send(new MessageProcessor("ACKRF").build());
                 }
             }
         }
