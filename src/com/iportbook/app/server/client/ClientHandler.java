@@ -15,14 +15,14 @@ public class ClientHandler extends ClientHandlerAbstract {
 
     @Override
     public void regis(String id, int password, int port) throws Exception {
-            client = cliManager.addClient(id, password, port);
-            daSo.send(new MessageProcessor("WELCO").build());
+        client = cliManager.addClient(id, password, port);
+        daSo.send(new MessageProcessor("WELCO").build());
     }
 
     @Override
     public void conne(String id, int password) throws Exception {
-            client = cliManager.getClient(id, password);
-            daSo.send(new MessageProcessor("HELLO").build());
+        client = cliManager.getClient(id, password);
+        daSo.send(new MessageProcessor("HELLO").build());
     }
 
     @Override
@@ -36,6 +36,8 @@ public class ClientHandler extends ClientHandlerAbstract {
                     //TODO: verification
                     int num = partial.getNumMess();
                     String mess = partial.getMess();
+                    if (mess.length() > 200)
+                        throw new Exception();
                     flux.addPartial(new MessageProcessor("MUNEM").setNumMess(num).setMess(mess).build());
                 }
             }

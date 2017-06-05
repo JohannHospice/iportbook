@@ -13,19 +13,6 @@ public class AppClient extends AppClientAbstract {
         super(host, portTCP, portUDP);
     }
 
-    public static void main(String args[]) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: need 2 arguments <portTCP> <portUDP>");
-            return;
-        }
-        final String hostTCP = "localhost";
-        final int portTCP = Integer.parseInt(args[0]);
-        final int portUDP = Integer.parseInt(args[1]);
-
-        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
-        new Thread(appClient).start();
-    }
-
     @Override
     void abo(String host, int port) throws IOException {
         SponsorHandler sponsorHandler = new SponsorHandler(host, port);
@@ -139,13 +126,15 @@ public class AppClient extends AppClientAbstract {
                 int numMess = messageProcessor.getNumMess();
                 StringBuilder output = new StringBuilder();
                 output.append(id).append(": ");
+                int offset = output.length();
                 for (int i = 0; i < numMess; i++) {
                     MessageProcessor partial = daSo.readMessageProcessor();
                     String typePartial = partial.getType();
                     if (Objects.equals("MUNEM", typePartial)) {
                         int num = partial.getNumMess();
                         String mess = partial.getMess();
-                        output.insert(output.length() + num * SIZE_MESS, mess);
+                        // output.setLength(output.length() + mess.length());
+                        output.insert(num * SIZE_MESS + offset, mess);
                     }
                 }
                 System.out.println(output.toString());
@@ -228,5 +217,18 @@ public class AppClient extends AppClientAbstract {
             System.out.println("Vous etes deconnectes du serveur");
             stop();
         }
+    }
+
+    public static void main(String args[]) throws IOException {
+        if (args.length < 2) {
+            System.err.println("Usage: need 2 arguments <portTCP> <portUDP> (<hostServer>)");
+            return;
+        }
+        final String hostTCP = args.length > 2 ? args[2] : "localhost";
+        final int portTCP = Integer.parseInt(args[0]);
+        final int portUDP = Integer.parseInt(args[1]);
+
+        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
+        new Thread(appClient).start();
     }
 }

@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class DataSocket {
     private static final Logger LOGGER = Logger.getGlobal();
-    private static final int SIZE_MESSAGE_MAX = 300;
+    private static final int SIZE_MESSAGE_MAX = 400;
     private final Socket socket;
     private DataOutputStream dos;
     private DataInputStream dis;

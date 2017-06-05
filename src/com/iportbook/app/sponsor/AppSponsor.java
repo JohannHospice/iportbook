@@ -34,20 +34,6 @@ public class AppSponsor extends ApplicationListener {
         this.ipDiff = ipDiff;
     }
 
-    public static void main(String[] args) throws IOException {
-        if (args.length != 3) {
-            System.out.println("Usage: need 3 arguments <portServer> <ipDiff> <portDiff>");
-            return;
-        }
-        final String hostServer = "localhost";
-        final String ipDiff = args[1];
-        final int portServer = Integer.parseInt(args[0]);
-        final int portDiff = Integer.parseInt(args[2]);
-
-        AppSponsor appSponsor = new AppSponsor(hostServer, portServer, portDiff, ipDiff);
-        new Thread(appSponsor).start();
-    }
-
     @Override
     protected void onStart() throws Exception {
         System.out.println("Connexion...");
@@ -56,14 +42,6 @@ public class AppSponsor extends ApplicationListener {
         info();
         help();
         System.out.println();
-    }
-
-    private void info() {
-        System.out.println("Informations:" +
-                "\n\tport Diff:\t" + portDiff +
-                "\n\tport TCP:\t" + portTCP +
-                "\n\tip Diff:\t" + ipDiff +
-                "\n\thost TCP:\t" + hostTCP);
     }
 
     @Override
@@ -97,6 +75,14 @@ public class AppSponsor extends ApplicationListener {
         udpSocket.close();
     }
 
+    private void info() {
+        System.out.println("Informations:" +
+                "\n\tport Diff:\t" + portDiff +
+                "\n\tport TCP:\t" + portTCP +
+                "\n\tip Diff:\t" + ipDiff +
+                "\n\thost TCP:\t" + hostTCP);
+    }
+
     private void help() {
         System.out.println("Utilisation:\n" +
                 "\t+publ <msg>\tEnvoyer une publicité sur le serveur\n" +
@@ -128,5 +114,19 @@ public class AppSponsor extends ApplicationListener {
         String type = answer.getType();
         if (Objects.equals(type, "PUBL>"))
             System.out.println("La publication à bien été transmise");
+    }
+
+    public static void main(String[] args) throws IOException {
+        if (args.length < 3) {
+            System.err.println("Usage: need 3 arguments <portServer> <ipDiff> <portDiff> (<hostServer>)");
+            return;
+        }
+        final String hostServer = args.length > 3 ? args[3] : "localhost";
+        final String ipDiff = args[1];
+        final int portServer = Integer.parseInt(args[0]);
+        final int portDiff = Integer.parseInt(args[2]);
+
+        AppSponsor appSponsor = new AppSponsor(hostServer, portServer, portDiff, ipDiff);
+        new Thread(appSponsor).start();
     }
 }

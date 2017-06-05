@@ -33,31 +33,36 @@ public abstract class AppClientAbstract extends ApplicationListener {
 
     @Override
     protected void onStart() throws Exception {
-        // run udp notification handler
-        new Thread(notificationHandler).start();
-        // run tcp
-        daSo = new DataSocket(host, portTCP);
-        portTCP = daSo.getLocalPort();
-
-        //conne regis
         try {
-            char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
-            switch (type) {
-                case '0': {
-                    String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<pwd>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
-                    conne(input[0], Integer.parseInt(input[1]));
-                    break;
+            // run udp notification handler
+            new Thread(notificationHandler).start();
+            // run tcp
+            daSo = new DataSocket(host, portTCP);
+            portTCP = daSo.getLocalPort();
+
+            //conne regis
+            try {
+                char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
+                switch (type) {
+                    case '0': {
+                        String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<mdp>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
+                        conne(input[0], Integer.parseInt(input[1]));
+                        break;
+                    }
+                    case '1': {
+                        id = termScanner.askNext("identifiant: ", "\\w{1,8}");
+                        int password = Integer.parseInt(termScanner.askNext("mot de passe: ", "\\d{1,5}"));
+                        int port = notificationHandler.getPort();
+                        regis(id, password, port);
+                        break;
+                    }
                 }
-                case '1': {
-                    id = termScanner.askNext("identifiant: ", "\\w{1,8}");
-                    int password = Integer.parseInt(termScanner.askNext("password: ", "\\d{1,5}"));
-                    int port = notificationHandler.getPort();
-                    regis(id, password, port);
-                    break;
-                }
+                help();
+            } catch (Exception e) {
+                stop();
             }
-            help();
         } catch (Exception e) {
+            System.err.println("Pas de serveur trouvé");
             stop();
         }
     }
@@ -123,7 +128,8 @@ public abstract class AppClientAbstract extends ApplicationListener {
     protected void onEnd() throws Exception {
         for (SponsorHandler spo : sponsorHandlers)
             spo.stop();
-        daSo.close();
+        if (daSo != null)
+            daSo.close();
         notificationHandler.stop();
         termScanner.close();
     }
