@@ -31,7 +31,7 @@ public class NotificationHandler extends ApplicationListener {
             StringBuilder builder = new StringBuilder("\n(" + fluxSize + ") ");
             switch (code) {
                 case Flux.FLOO:
-                    builder.append("Innondation");
+                    builder.append("Inondation");
                     break;
                 case Flux.FRIE:
                     builder.append("Requete d'ami");

@@ -43,15 +43,14 @@ public abstract class AppClientAbstract extends ApplicationListener {
             //conne regis
             try {
                 char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
+                String id = termScanner.askNext("identifiant: ", "\\w{1,8}");
+                int password = Integer.parseInt(termScanner.askNext("mot de passe: ", "\\d{1,5}"));
                 switch (type) {
                     case '0': {
-                        String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<mdp>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
-                        conne(input[0], Integer.parseInt(input[1]));
+                        conne(id, password);
                         break;
                     }
                     case '1': {
-                        id = termScanner.askNext("identifiant: ", "\\w{1,8}");
-                        int password = Integer.parseInt(termScanner.askNext("mot de passe: ", "\\d{1,5}"));
                         int port = notificationHandler.getPort();
                         regis(id, password, port);
                         break;
@@ -136,8 +135,8 @@ public abstract class AppClientAbstract extends ApplicationListener {
 
     private void help() {
         System.out.println("Utilisation:\n" +
-                "\t<msg>\t\t\t\tInnoder\n" +
-                "\t@<id> <msg>\t\t\tenvoyer un message privé\n" +
+                "\t<msg>\t\t\t\tInonder\n" +
+                "\t@<id> <msg>\t\t\tEnvoyer un message privé\n" +
                 "\t+add @<id>\t\t\tEnvoyer une demande d'ami\n" +
                 "\t+add #<ip>:<port>\tS'abonner à un promotteur\n" +
                 "\t+consu\t\t\t\tConsulation des notifications\n" +

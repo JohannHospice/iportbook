@@ -33,7 +33,6 @@ public class ClientHandler extends ClientHandlerAbstract {
                 MessageProcessor partial = daSo.readMessageProcessor();
                 String type = partial.getType();
                 if (Objects.equals(type, "MENUM")) {
-                    //TODO: verification
                     int num = partial.getNumMess();
                     String mess = partial.getMess();
                     if (mess.length() > 200)
@@ -61,7 +60,7 @@ public class ClientHandler extends ClientHandlerAbstract {
     @Override
     public void frie(String id) throws Exception {
         try {
-            if (Objects.equals(client.getId(), id) || !cliManager.hasClientById(id))
+            if (Objects.equals(client.getId(), id) || !cliManager.hasClientById(id) || client.hasFriend(id))
                 throw new Exception();
             cliManager.addFlux(id, new Flux(Flux.FRIE, new MessageProcessor("EIRF>").setId(client.getId()).build()));
             daSo.send(new MessageProcessor("FRIE>").build());

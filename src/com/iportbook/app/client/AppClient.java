@@ -13,6 +13,19 @@ public class AppClient extends AppClientAbstract {
         super(host, portTCP, portUDP);
     }
 
+    public static void main(String args[]) throws IOException {
+        if (args.length < 2) {
+            System.err.println("Usage: need 2 arguments <portTCP> <portUDP> (<hostServer>)");
+            return;
+        }
+        final String hostTCP = args.length > 2 ? args[2] : "localhost";
+        final int portTCP = Integer.parseInt(args[0]);
+        final int portUDP = Integer.parseInt(args[1]);
+
+        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
+        new Thread(appClient).start();
+    }
+
     @Override
     void abo(String host, int port) throws IOException {
         SponsorHandler sponsorHandler = new SponsorHandler(host, port);
@@ -119,7 +132,7 @@ public class AppClient extends AppClientAbstract {
         String type = messageProcessor.getType();
         switch (type) {
             case "NOCON":
-                System.out.println("Aucune nouvelles notifications");
+                System.out.println("Aucune nouvelle notification");
                 break;
             case "SSEM>": {
                 String id = messageProcessor.getId();
@@ -156,7 +169,7 @@ public class AppClient extends AppClientAbstract {
             case "EIRF>": {
                 String id = messageProcessor.getId();
                 System.out.println("@" + id + " vous demande en ami");
-                String input = termScanner.askNext("Voulez vous accepté sa demande?\n0:\tnon\n1:\toui", "^(0|1)$");
+                String input = termScanner.askNext("Voulez vous accepter sa demande?\n1:\toui\n0:\tnon\n> ", "^(0|1)$");
                 switch (input.charAt(0)) {
                     case '1': {
                         daSo.send(new MessageProcessor("OKIRF").build());
@@ -217,18 +230,5 @@ public class AppClient extends AppClientAbstract {
             System.out.println("Vous etes deconnectes du serveur");
             stop();
         }
-    }
-
-    public static void main(String args[]) throws IOException {
-        if (args.length < 2) {
-            System.err.println("Usage: need 2 arguments <portTCP> <portUDP> (<hostServer>)");
-            return;
-        }
-        final String hostTCP = args.length > 2 ? args[2] : "localhost";
-        final int portTCP = Integer.parseInt(args[0]);
-        final int portUDP = Integer.parseInt(args[1]);
-
-        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
-        new Thread(appClient).start();
     }
 }

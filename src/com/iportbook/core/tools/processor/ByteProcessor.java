@@ -132,7 +132,7 @@ public class ByteProcessor {
             tmp[i] = new byte[until[i].length];
         int i = offset;
         boolean run = true;
-        while (i < data.length && i - offset < limit && run) {
+        while (i < data.length && /*i - offset < limit && */run) {
             for (int j = 0; j < until.length; j++)
                 Utility.dequeue(tmp[j], data[i]);
             str.append((char) data[i++]);

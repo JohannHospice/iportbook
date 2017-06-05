@@ -6,6 +6,8 @@ import com.iportbook.core.tools.processor.NotificationProcessor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Objects;
 
 public class Client implements Serializable {
     private String id;
@@ -86,5 +88,16 @@ public class Client implements Serializable {
 
     public void addFlux(int type, byte[] message) throws IOException {
         addFlux(new Flux(type, message));
+    }
+
+    public boolean hasFriend(String id) {
+        boolean hasClient = false;
+        Iterator<Client> iter = friendsId.iterator();
+        while (!hasClient && iter.hasNext()) {
+            Client next = iter.next();
+            if (Objects.equals(next.getId(), id))
+                hasClient = true;
+        }
+        return hasClient;
     }
 }
