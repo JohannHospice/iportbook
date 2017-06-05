@@ -1,8 +1,8 @@
 package com.iportbook.app.client;
 
 import com.iportbook.app.ClientAction;
-import com.iportbook.app.TerminalScanner;
 import com.iportbook.core.tools.ApplicationListener;
+import com.iportbook.core.tools.TerminalScanner;
 import com.iportbook.core.tools.net.DataSocket;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
@@ -22,7 +22,19 @@ public class AppClient extends ApplicationListener implements ClientAction {
         this.host = host;
         this.portTCP = portTCP;
         notificationHandler = new NotificationHandler(portUDP);
-        daSo = new DataSocket();
+    }
+
+    public static void main(String args[]) throws IOException {
+        if (args.length != 2) {
+            System.out.println("Usage: need 2 arguments");
+            return;
+        }
+        final String hostTCP = "localhost";
+        final int portTCP = Integer.parseInt(args[0]);
+        final int portUDP = Integer.parseInt(args[1]);
+
+        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
+        new Thread(appClient).start();
     }
 
     @Override
@@ -30,13 +42,13 @@ public class AppClient extends ApplicationListener implements ClientAction {
         // run udp notification handler
         new Thread(notificationHandler).start();
         // run tcp
-        daSo.bind(host, portTCP);
+        daSo = new DataSocket(host, portTCP);
         portTCP = daSo.getLocalPort();
 
         //conne regis
         char type = termScanner.ask("connection(0), register(1): ", "\\d").charAt(0);
-        String id = termScanner.ask("identifiant: ");
-        int password = Integer.parseInt(termScanner.ask("password: "));
+        String id = termScanner.ask("identifiant: ", "\\w{1,8}");
+        int password = Integer.parseInt(termScanner.ask("password: ", "\\d{1,5}"));
 
         switch (type) {
             case '0':
@@ -52,7 +64,7 @@ public class AppClient extends ApplicationListener implements ClientAction {
     @Override
     protected void onLoop() throws Exception {
         // first send
-        String text = termScanner.nextLine();
+        String text = termScanner.next();
         daSo.send(inputToMessageProcessor(text).build());
 
         // then receive answer
@@ -77,12 +89,9 @@ public class AppClient extends ApplicationListener implements ClientAction {
      */
     // TODO: process an easiest protocol for text treatment
     private MessageProcessor inputToMessageProcessor(String input) throws Exception {
-        String firstChar = input.substring(0, 1);
         MessageProcessor mp = null;
-
-        if (firstChar == "+") {
+        if (input.charAt(0) == '+') {
             String arr[] = input.split(" ", 2);
-
             switch (arr[0]) {
                 case "+list":
                     mp = new MessageProcessor("LIST?");
@@ -109,16 +118,16 @@ public class AppClient extends ApplicationListener implements ClientAction {
     //TODO
     @Override
     public void regis(String id, int password, int port) throws Exception {
-        daSo.send(new MessageProcessor("REGIS").setId(id).setPassword(password).setPort(port).build());
+        daSo.send(new MessageProcessor("REGIS").setId(id).setPort(port).setPassword(password).build());
 
         MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
         String type = messageProcessor.getType();
         switch (type) {
             case "WELCO":
-                System.out.println("Utilisateur enregistree" + messageProcessor.getId() + " " + messageProcessor.getPassword());
+                System.out.println("vous etes bien inscrit");
                 break;
             case "GOBYE":
-                System.out.println("Serveur rempli ou Mauvais port ou Mauvais password");
+                System.out.println("erreur lors de l'inscription");
                 stop();
             default:
                 System.out.println("Fatal Error Register");
@@ -180,18 +189,5 @@ public class AppClient extends ApplicationListener implements ClientAction {
     @Override
     public void iquit() throws Exception {
 
-    }
-
-    public static void main(String args[]) throws IOException {
-        if (args.length != 2) {
-            System.out.println("Usage: need 2 arguments");
-            return;
-        }
-        final String hostTCP = "localhost";
-        final int portTCP = Integer.parseInt(args[0]);
-        final int portUDP = Integer.parseInt(args[1]);
-
-        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
-        new Thread(appClient).start();
     }
 }
