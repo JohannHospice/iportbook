@@ -12,12 +12,18 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class ClientManager {
+    private static final String FILENAME = "sav.bin";
     private static ClientManager self = null;
     private ArrayList<Client> clients = new ArrayList<>();
     private ArrayList<ClientHandlerAbstract> cliHandlers = new ArrayList<>();
-    private static final String FILENAME = "sav.bin";
 
     private ClientManager() {
+    }
+
+    public static ClientManager getInstance() {
+        if (self == null)
+            self = new ClientManager();
+        return self;
     }
 
     public void store() throws IOException {
@@ -57,8 +63,10 @@ public class ClientManager {
     }
 
     public void floodFriend(Client client, Flux flux) throws ClientException, IOException {
+        ArrayList<String> visited = new ArrayList<>();
+        visited.add(client.getId());
         for (Client friend : client.getFriends())
-            floodFriend(friend, flux, new ArrayList<>());
+            floodFriend(friend, flux, visited);
         try {
             store();
         } catch (IOException e) {
@@ -70,8 +78,8 @@ public class ClientManager {
         client.addFluxNotify(flux);
         visited.add(client.getId());
         for (Client friend : client.getFriends())
-            if (!visited.contains(client.getId()))
-                floodFriend(friend, flux);
+            if (!visited.contains(friend.getId()))
+                floodFriend(friend, flux, visited);
     }
 
     public void addFriendship(String id1, String id2) throws ClientException {
@@ -158,11 +166,5 @@ public class ClientManager {
 
     public int getClientSize() {
         return clients.size();
-    }
-
-    public static ClientManager getInstance() {
-        if (self == null)
-            self = new ClientManager();
-        return self;
     }
 }
