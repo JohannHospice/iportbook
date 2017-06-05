@@ -25,10 +25,6 @@ public class DataSocket {
         this.socket = socket;
     }
 
-    public DataSocket() throws IOException {
-        this.socket = new Socket();
-    }
-
     public void bind(String host, int port) throws IOException {
         this.socket.bind(new InetSocketAddress(host, port));
     }

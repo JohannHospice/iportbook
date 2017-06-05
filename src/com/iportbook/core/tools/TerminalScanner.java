@@ -1,12 +1,19 @@
-package com.iportbook.app;
+package com.iportbook.core.tools;
 
 import java.util.Scanner;
 
 public class TerminalScanner {
     private Scanner scanner = new Scanner(System.in);
 
-    public String nextLine() {
-        return scanner.nextLine();
+    public void indent() {
+        System.out.print("> ");
+    }
+
+    public String next() {
+        indent();
+        String input = scanner.next();
+        scanner.nextLine();
+        return input;
     }
 
     /**
@@ -15,22 +22,29 @@ public class TerminalScanner {
      * @param pattern String
      * @return String
      */
-    public String getNext(String pattern) {
+    public String next(String pattern) {
+        indent();
         String next = null;
-        while (scanner.hasNext(pattern))
+        if (scanner.hasNext(pattern))
             next = scanner.next();
         return next;
     }
 
     public String ask(String question) {
         System.out.print(question);
-        return nextLine();
+        return next();
     }
 
     public String ask(String question, String pattern) {
         System.out.println(question);
-        System.out.print("> ");
-        return getNext(pattern);
+        String next = null;
+        while (next == null) {
+            indent();
+            if (scanner.hasNext(pattern))
+                next = scanner.next(pattern);
+            scanner.nextLine();
+        }
+        return next;
     }
 
     public void close() {

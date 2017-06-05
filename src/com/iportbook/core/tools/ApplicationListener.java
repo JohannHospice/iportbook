@@ -3,7 +3,7 @@ package com.iportbook.core.tools;
 import java.util.logging.Logger;
 
 public abstract class ApplicationListener implements Runnable {
-    protected final Logger LOGGER = Logger.getLogger(String.valueOf(getClass()));
+    protected final Logger LOGGER = Logger.getLogger(this.getClass().getName());
     private boolean run = true;
 
     public void stop() {

@@ -12,13 +12,12 @@ public class NotificationHandler extends ApplicationListener {
     private int port;
 
     public NotificationHandler(int port) throws IOException {
-        datagramSocketReceiver = new DatagramSocketReceiver();
+        datagramSocketReceiver = new DatagramSocketReceiver(port);
         this.port = port;
     }
 
     @Override
     protected void onStart() throws IOException {
-        datagramSocketReceiver.bind(port);
         port = datagramSocketReceiver.getLocalPort();
     }
 

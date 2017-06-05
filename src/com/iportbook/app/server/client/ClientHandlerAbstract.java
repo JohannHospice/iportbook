@@ -8,6 +8,7 @@ import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public abstract class ClientHandlerAbstract extends ApplicationListener implements ClientAction {
     protected final ClientManager cliManager = ClientManager.getInstance();
@@ -87,6 +88,9 @@ public abstract class ClientHandlerAbstract extends ApplicationListener implemen
                 default:
                     throw new Exception();
             }
+        } catch (SocketException e) {
+            e.printStackTrace();
+            stop();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ package com.iportbook.core.tools.processor;
 import com.iportbook.core.tools.Utility;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class ByteProcessor {
     private final byte[] data;
@@ -10,6 +11,7 @@ public class ByteProcessor {
     private int size = 0;
 
     public ByteProcessor(byte[] data) {
+        Logger.getGlobal().info(new String(data, 0, data.length));
         this.data = data;
     }
 
@@ -19,13 +21,6 @@ public class ByteProcessor {
 
     public ByteProcessor jump() {
         offset++;
-        return this;
-    }
-
-    public ByteProcessor setOffset(int offset) {
-        if (offset > this.offset)
-            size = offset;
-        this.offset = offset;
         return this;
     }
 
@@ -76,6 +71,13 @@ public class ByteProcessor {
 
     public int getOffset() {
         return offset;
+    }
+
+    public ByteProcessor setOffset(int offset) {
+        if (offset > this.offset)
+            size = offset;
+        this.offset = offset;
+        return this;
     }
 
     public int getInt(int length) {
@@ -151,6 +153,7 @@ public class ByteProcessor {
     public byte[] getBytes() {
         byte[] res = new byte[offset];
         System.arraycopy(data, 0, res, 0, offset);
+        Logger.getGlobal().info(new String(res, 0, offset));
         return res;
     }
 }
