@@ -20,10 +20,14 @@ class SponsorHandler extends ApplicationListener {
 
     @Override
     protected void onStart() throws Exception {
-        this.multicastSocket = new MulticastSocket(port);
-        this.multicastSocket.joinGroup(InetAddress.getByName(host));
-        byte[] data = new byte[305];
-        packet = new DatagramPacket(data, data.length);
+        try {
+            this.multicastSocket = new MulticastSocket(port);
+            this.multicastSocket.joinGroup(InetAddress.getByName(host));
+            byte[] data = new byte[305];
+            packet = new DatagramPacket(data, data.length);
+        } catch (IOException e) {
+            stop();
+        }
     }
 
     @Override
@@ -44,6 +48,7 @@ class SponsorHandler extends ApplicationListener {
     protected void onEnd() throws Exception {
         try {
             multicastSocket.close();
+            System.out.println("Vous etes maintenant désabonné du promoteur #" + host + ":" + port);
         } catch (Exception ignored) {
         }
     }
@@ -51,6 +56,9 @@ class SponsorHandler extends ApplicationListener {
     @Override
     public void stop() {
         super.stop();
-        multicastSocket.close();
+        try {
+            multicastSocket.close();
+        } catch (Exception ignored) {
+        }
     }
 }

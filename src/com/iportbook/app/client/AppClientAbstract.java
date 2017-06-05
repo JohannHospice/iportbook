@@ -40,23 +40,26 @@ public abstract class AppClientAbstract extends ApplicationListener {
         portTCP = daSo.getLocalPort();
 
         //conne regis
-        char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
-
-        switch (type) {
-            case '0': {
-                String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<pwd>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
-                conne(input[0], Integer.parseInt(input[1]));
-                break;
+        try {
+            char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
+            switch (type) {
+                case '0': {
+                    String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<pwd>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
+                    conne(input[0], Integer.parseInt(input[1]));
+                    break;
+                }
+                case '1': {
+                    id = termScanner.askNext("identifiant: ", "\\w{1,8}");
+                    int password = Integer.parseInt(termScanner.askNext("password: ", "\\d{1,5}"));
+                    int port = notificationHandler.getPort();
+                    regis(id, password, port);
+                    break;
+                }
             }
-            case '1': {
-                id = termScanner.askNext("identifiant: ", "\\w{1,8}");
-                int password = Integer.parseInt(termScanner.askNext("password: ", "\\d{1,5}"));
-                int port = notificationHandler.getPort();
-                regis(id, password, port);
-                break;
-            }
+            help();
+        } catch (Exception e) {
+            stop();
         }
-        help();
     }
 
     @Override
@@ -85,6 +88,8 @@ public abstract class AppClientAbstract extends ApplicationListener {
                                 case '@':
                                     frie(name.substring(1));
                                     break;
+                                default:
+                                    throw new Exception();
                             }
                             break;
                         }
@@ -100,6 +105,8 @@ public abstract class AppClientAbstract extends ApplicationListener {
                         case "+list":
                             list();
                             break;
+                        default:
+                            throw new Exception();
                     }
                     break;
                 }
@@ -108,7 +115,17 @@ public abstract class AppClientAbstract extends ApplicationListener {
                 }
             }
         } catch (Exception ignored) {
+            System.err.println("erreur lors du traitement de votre requete.");
         }
+    }
+
+    @Override
+    protected void onEnd() throws Exception {
+        for (SponsorHandler spo : sponsorHandlers)
+            spo.stop();
+        daSo.close();
+        notificationHandler.stop();
+        termScanner.close();
     }
 
     private void help() {
@@ -120,15 +137,6 @@ public abstract class AppClientAbstract extends ApplicationListener {
                 "\t+consu\t\t\t\tConsulation des notifications\n" +
                 "\t+list\t\t\t\tAfficher la liste des clients\n" +
                 "\t+quit\t\t\t\tSe déconnecter");
-    }
-
-    @Override
-    protected void onEnd() throws Exception {
-        for (SponsorHandler spo : sponsorHandlers)
-            spo.stop();
-        daSo.close();
-        notificationHandler.stop();
-        termScanner.close();
     }
 
     abstract void abo(String host, int port) throws IOException;

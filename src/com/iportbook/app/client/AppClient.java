@@ -31,7 +31,7 @@ public class AppClient extends AppClientAbstract {
         SponsorHandler sponsorHandler = new SponsorHandler(host, port);
         sponsorHandlers.add(sponsorHandler);
         new Thread(sponsorHandler).start();
-        System.out.println("Vous etes maintenant abonné à #" + host + ":" + port + "");
+        System.out.println("Vous etes maintenant abonné au promoteur #" + host + ":" + port + "");
     }
 
     @Override
@@ -49,7 +49,7 @@ public class AppClient extends AppClientAbstract {
             case "GOBYE":
                 System.err.println("erreur lors de l'inscription");
             default:
-                stop();
+                throw new Exception();
         }
     }
 
@@ -67,7 +67,7 @@ public class AppClient extends AppClientAbstract {
             case "GOBYE":
                 System.err.println("erreur lors de la connection");
             default:
-                stop();
+                throw new Exception();
         }
     }
 
