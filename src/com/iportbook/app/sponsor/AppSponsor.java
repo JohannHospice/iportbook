@@ -50,54 +50,83 @@ public class AppSponsor extends ApplicationListener {
 
     @Override
     protected void onStart() throws Exception {
+        System.out.println("Connexion...");
         daSo = new DataSocket(hostTCP, portTCP);
         udpSocket = new DatagramSocketSender(portDiff, ipDiff);
+        info();
+        help();
         System.out.println();
+    }
+
+    private void info() {
+        System.out.println("Informations:" +
+                "\n\tport Diff:\t" + portDiff +
+                "\n\tport TCP:\t" + portTCP +
+                "\n\tip Diff:\t" + ipDiff +
+                "\n\thost TCP:\t" + hostTCP);
     }
 
     @Override
     protected void onLoop() throws Exception {
-        switch (termScanner.askNext("Que voulez vous faire:\n prom - Promotion\n publ - Publicite\n quit - quit\nVotre choix: ", "^(prom|publ|quit)$")) {
-            case "prom": {
-                String mess = termScanner.askNextLine("\nSaisissez le message de promotion:\n> ", SIZE_PROM);
-                prom(mess);
-                break;
+        try {
+            String[] input = termScanner.askNextLine("> ").split(" ", 2);
+            switch (input[0]) {
+                case "+prom": {
+                    prom(input[1]);
+                    break;
+                }
+                case "+publ": {
+                    publ(udpSocket.getHost(), udpSocket.getPort(), input[1]);
+                    break;
+                }
+                case "+help":
+                    help();
+                    break;
+                case "+quit":
+                    stop();
             }
-            case "publ": {
-                String mess = termScanner.askNextLine("\nSaisissez le message de publicité:\n> ", SIZE_PUBL);
-                publ(udpSocket.getHost(), udpSocket.getPort(), mess);
-                break;
-            }
-            case "quit":
-                System.out.println();
-                stop();
+        } catch (Exception ignored) {
+            System.err.println("Erreur lors du traitement de votre requete.");
         }
     }
 
     @Override
     protected void onEnd() throws Exception {
+        System.out.println("Déconnexion...");
         daSo.close();
         udpSocket.close();
     }
 
-    private void prom(String mess) throws IOException {
+    private void help() {
+        System.out.println("Utilisation:\n" +
+                "\t+publ <msg>\tEnvoyer une publicité sur le serveur\n" +
+                "\t+prom <msg>\tFaire une Promotion\n" +
+                "\t+quit\t\tSe déconnecter\n" +
+                "\t+help\t\tAide");
+    }
+
+    private void prom(String mess) throws Exception {
+        if (mess.length() > SIZE_PROM)
+            throw new Exception();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("PROM ").append(mess);
         for (int i = 0; i < SIZE_PROM - mess.length(); i++)
             stringBuilder.append('#');
         udpSocket.send(stringBuilder.toString());
-        System.out.println("+ La promotion à bien été retransmise\n");
+        System.out.println("La promotion à bien été transmise");
     }
 
     private void publ(String host, int port, String mess) throws Exception {
+        if (mess.length() > SIZE_PUBL)
+            throw new Exception();
         daSo.send(new MessageProcessor("PUBL?")
                 .setIpDiff(host)
                 .setPort(port)
                 .setMess(mess)
                 .build());
-        MessageProcessor answer = new MessageProcessor(daSo.read());
+        MessageProcessor answer = daSo.readMessageProcessor();
         String type = answer.getType();
         if (Objects.equals(type, "PUBL>"))
-            System.out.println("+ La publication à bien été retransmise\n");
+            System.out.println("La publication à bien été transmise");
     }
 }

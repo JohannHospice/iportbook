@@ -47,24 +47,40 @@ public class ServerSponsor extends ServerListener {
 
         @Override
         protected void onLoop() throws Exception {
-            MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
-            String type = messageProcessor.getType();
-            if (Objects.equals(type, "PUBL?")) {
-                String ipDiff = messageProcessor.getIpDiff();
-                int port = messageProcessor.getPort();
-                String mess = messageProcessor.getMess();
-                publ(ipDiff, port, mess);
+            try {
+                MessageProcessor messageProcessor = daSo.readMessageProcessor();
+                String type = messageProcessor.getType();
+                if (Objects.equals(type, "PUBL?")) {
+                    String ipDiff = messageProcessor.getIpDiff();
+                    int port = messageProcessor.getPort();
+                    String mess = messageProcessor.getMess();
+                    publ(ipDiff, port, mess);
+                }
+            } catch (IOException e) {
+                stop();
+            } catch (Exception ignored) {
             }
         }
 
         @Override
         protected void onEnd() throws Exception {
             daSo.close();
+            sponsorHandlers.remove(this);
         }
 
         private void publ(String ipDiff, int port, String mess) throws Exception {
             ClientManager.getInstance().addFluxToAll(Flux.PUBL, new MessageProcessor("LBUP>").setIpDiff(ipDiff).setPort(port).setMess(mess).build());
             daSo.send(new MessageProcessor("PUBL>").build());
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            try {
+                daSo.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

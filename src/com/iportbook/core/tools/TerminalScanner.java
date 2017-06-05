@@ -37,7 +37,6 @@ public class TerminalScanner {
         return next;
     }
 
-
     private String nextLine(int length) {
         String next = null;
         while (next == null) {
@@ -47,6 +46,18 @@ public class TerminalScanner {
                     System.out.print("La taille du champs est comprise entre 0 et " + length + " caracteres.\n> ");
                     next = null;
                 }
+            }
+        }
+        return next;
+    }
+
+    private String nextLine() {
+        String next = null;
+        while (next == null) {
+            if (scanner.hasNextLine()) {
+                next = scanner.nextLine();
+                if (next.length() <= 0)
+                    next = null;
             }
         }
         return next;
@@ -65,6 +76,11 @@ public class TerminalScanner {
     public String askNextLine(String question, int length) {
         System.out.print(question);
         return nextLine(length);
+    }
+
+    public String askNextLine(String question) {
+        System.out.print(question);
+        return nextLine();
     }
 
     public void close() {

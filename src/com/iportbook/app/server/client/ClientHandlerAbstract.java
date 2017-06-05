@@ -7,7 +7,6 @@ import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 
 public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected final ClientManager cliManager = ClientManager.getInstance();
@@ -21,7 +20,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onStart() {
         try {
-            MessageProcessor message = new MessageProcessor(daSo.read());
+            MessageProcessor message = daSo.readMessageProcessor();
             String type = message.getType();
             String id = message.getId();
             switch (type) {
@@ -53,7 +52,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     @Override
     protected void onLoop() {
         try {
-            MessageProcessor message = new MessageProcessor(daSo.read());
+            MessageProcessor message = daSo.readMessageProcessor();
             String type = message.getType();
             switch (type) {
                 case "FRIE?": {
@@ -84,7 +83,7 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
                 default:
                     throw new Exception();
             }
-        } catch (SocketException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             stop();
         } catch (Exception e) {

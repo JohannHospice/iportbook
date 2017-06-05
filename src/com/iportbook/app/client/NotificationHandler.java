@@ -23,33 +23,42 @@ public class NotificationHandler extends ApplicationListener {
 
     @Override
     protected void onLoop() throws IOException {
-        NotificationProcessor notificationProcessor = datagramSocketReceiver.receiveMessageUDP();
-        int fluxSize = notificationProcessor.getFluxSize();
-        int code = notificationProcessor.getCode();
+        try {
+            NotificationProcessor notificationProcessor = datagramSocketReceiver.receiveMessageUDP();
+            int fluxSize = notificationProcessor.getFluxSize();
+            int code = notificationProcessor.getCode();
 
-        StringBuilder builder = new StringBuilder("(" + fluxSize + ") ");
-        switch (code) {
-            case Flux.FLOO:
-                builder.append("Innondation");
-                break;
-            case Flux.FRIE:
-                builder.append("Requete d'ami");
-                break;
-            case Flux.MESS:
-                builder.append("Message prive");
-                break;
-            case Flux.NOKRF:
-                builder.append("Requete d'ami refusee");
-                break;
-            case Flux.OKIRF:
-                builder.append("Requete d'ami acceptee");
-                break;
-            case Flux.PUBL:
-                builder.append("Publicite");
-                break;
+            StringBuilder builder = new StringBuilder("\n(" + fluxSize + ") ");
+            switch (code) {
+                case Flux.FLOO:
+                    builder.append("Innondation");
+                    break;
+                case Flux.FRIE:
+                    builder.append("Requete d'ami");
+                    break;
+                case Flux.MESS:
+                    builder.append("Message prive");
+                    break;
+                case Flux.NOKRF:
+                    builder.append("Requete d'ami refusee");
+                    break;
+                case Flux.OKIRF:
+                    builder.append("Requete d'ami acceptee");
+                    break;
+                case Flux.PUBL:
+                    builder.append("Publicite");
+                    break;
+            }
+            builder.append("\n> ");
+            System.out.print(builder.toString());
+        } catch (Exception ignored) {
         }
-        builder.append("\n> ");
-        System.out.print(builder.toString());
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        datagramSocketReceiver.close();
     }
 
     @Override

@@ -30,7 +30,7 @@ class SponsorHandler extends ApplicationListener {
     protected void onLoop() throws Exception {
         multicastSocket.receive(packet);
         String str = new String(packet.getData(), 0, packet.getLength());
-        System.out.println("\n(" + host + ":" + port + ")pro> " + getMessage(str) + "\n> ");
+        System.out.print("\n#" + host + ":" + port + " pro: " + getMessage(str) + "\n> ");
     }
 
     private String getMessage(String str) {
@@ -42,6 +42,15 @@ class SponsorHandler extends ApplicationListener {
 
     @Override
     protected void onEnd() throws Exception {
+        try {
+            multicastSocket.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
         multicastSocket.close();
     }
 }

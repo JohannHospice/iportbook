@@ -30,7 +30,7 @@ public class ClientHandler extends ClientHandlerAbstract {
         try {
             Flux flux = new Flux(3, new MessageProcessor("SSEM>").setId(client.getId()).setNumMess(numMess).build());
             for (int i = 0; i < numMess; i++) {
-                MessageProcessor partial = new MessageProcessor(daSo.read());
+                MessageProcessor partial = daSo.readMessageProcessor();
                 String type = partial.getType();
                 if (Objects.equals(type, "MENUM")) {
                     //TODO: verification
@@ -49,6 +49,7 @@ public class ClientHandler extends ClientHandlerAbstract {
 
 
     @Override
+
     public void floo(String mess) throws Exception {
         Flux flux = new Flux(4, new MessageProcessor("OOLF>").setId(client.getId()).setMess(mess).build());
         cliManager.floodFriend(client, flux);
@@ -81,7 +82,7 @@ public class ClientHandler extends ClientHandlerAbstract {
             switch (fluxMessage.getType()) {
                 case "EIRF>": {
                     String id = fluxMessage.getId();
-                    MessageProcessor receiveMessage = new MessageProcessor(daSo.read());
+                    MessageProcessor receiveMessage = daSo.readMessageProcessor();
                     String type = receiveMessage.getType();
                     switch (type) {
                         case "OKIRF": {

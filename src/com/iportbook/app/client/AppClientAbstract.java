@@ -13,16 +13,17 @@ public abstract class AppClientAbstract extends ApplicationListener {
         Logger.getGlobal().setUseParentHandlers(false);
     }
 
-    ArrayList<SponsorHandler> sponsorHandlers = new ArrayList<>();
     private final String host;
-    private int portTCP;
+    public int port;
     protected String id;
-    private NotificationHandler notificationHandler;
+    ArrayList<SponsorHandler> sponsorHandlers = new ArrayList<>();
     TerminalScanner termScanner = new TerminalScanner();
     /**
      * allow you to send and receive TCP request
      */
     DataSocket daSo;
+    private int portTCP;
+    private NotificationHandler notificationHandler;
 
     AppClientAbstract(String host, int portTCP, int portUDP) throws IOException {
         this.host = host;
@@ -39,63 +40,86 @@ public abstract class AppClientAbstract extends ApplicationListener {
         portTCP = daSo.getLocalPort();
 
         //conne regis
-        char type = termScanner.askNext("connection(0), register(1): ", "\\d").charAt(0);
-        id = termScanner.askNext("identifiant: ", "\\w{1,8}");
-        int password = Integer.parseInt(termScanner.askNext("password: ", "\\d{1,5}"));
+        char type = termScanner.askNext("Que voulez vous faire?\n0: Connexion\n1: Inscription\n> ", "^(0|1)$").charAt(0);
 
         switch (type) {
-            case '0':
-                conne(id, password);
+            case '0': {
+                String[] input = termScanner.askNext("Saisissez vos identifiants [<id>:<pwd>]:\n> ", "\\w{1,8}:\\d{1,5}").split(":");
+                conne(input[0], Integer.parseInt(input[1]));
                 break;
-            case '1':
+            }
+            case '1': {
+                id = termScanner.askNext("identifiant: ", "\\w{1,8}");
+                int password = Integer.parseInt(termScanner.askNext("password: ", "\\d{1,5}"));
                 int port = notificationHandler.getPort();
                 regis(id, password, port);
                 break;
+            }
         }
+        help();
     }
 
     @Override
     protected void onLoop() throws Exception {
         try {
-
-            String input = termScanner.askNextLine(id + "> ", 300);
-
-            if (input.charAt(0) == '+') {
-                String command[] = input.split(" ", 2);
-                switch (command[0]) {
-                    case "+quit":
-                        iquit();
-                        break;
-                    case "+consu":
-                        consu();
-                        break;
-                    case "+list":
-                        list();
-                        break;
-                    case "+frie": {
-                        String id = command[1];
-                        frie(id);
-                        break;
-                    }
-                    case "+abo": {
-                        String[] address = command[1].split(":");
-                        String host = address[0];
-                        int port = Integer.parseInt(address[1]);
-                        abo(host, port);
-                        break;
-                    }
-                    default: {
-                        String id = command[0].substring(1, command[0].length());
-                        mess(id, command[1]);
-                        break;
-                    }
+            String input = termScanner.askNextLine(id + "> ");
+            switch (input.charAt(0)) {
+                case '@': {
+                    String command[] = input.split(" ", 2);
+                    String id = command[0].substring(1, command[0].length());
+                    mess(id, command[1]);
+                    break;
                 }
-            } else if (!input.isEmpty()) {
-                floo(input);
+                case '+': {
+                    String command[] = input.split(" ", 2);
+                    String type = command[0];
+                    switch (type) {
+                        case "+add": {
+                            String name = command[1];
+                            switch (name.charAt(0)) {
+                                case '#':
+                                    String[] address = name.substring(1).split(":");
+                                    if (address.length == 2)
+                                        abo(address[0], Integer.parseInt(address[1]));
+                                    break;
+                                case '@':
+                                    frie(name.substring(1));
+                                    break;
+                            }
+                            break;
+                        }
+                        case "+help":
+                            help();
+                            break;
+                        case "+quit":
+                            iquit();
+                            break;
+                        case "+consu":
+                            consu();
+                            break;
+                        case "+list":
+                            list();
+                            break;
+                    }
+                    break;
+                }
+                default: {
+                    floo(input);
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
+    }
+
+    private void help() {
+        System.out.println("Utilisation:\n" +
+                "\t<msg>\t\t\t\tInnoder\n" +
+                "\t@<id> <msg>\t\t\tenvoyer un message privé\n" +
+                "\t+add @<id>\t\t\tEnvoyer une demande d'ami\n" +
+                "\t+add #<ip>:<port>\tS'abonner à un promotteur\n" +
+                "\t+consu\t\t\t\tConsulation des notifications\n" +
+                "\t+list\t\t\t\tAfficher la liste des clients\n" +
+                "\t+quit\t\t\t\tSe déconnecter");
     }
 
     @Override

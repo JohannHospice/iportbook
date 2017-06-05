@@ -1,13 +1,8 @@
 package com.iportbook.app.client;
 
-import com.iportbook.core.tools.ApplicationListener;
 import com.iportbook.core.tools.processor.MessageProcessor;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class AppClient extends AppClientAbstract {
@@ -18,11 +13,25 @@ public class AppClient extends AppClientAbstract {
         super(host, portTCP, portUDP);
     }
 
+    public static void main(String args[]) throws IOException {
+        if (args.length != 2) {
+            System.err.println("Usage: need 2 arguments <portTCP> <portUDP>");
+            return;
+        }
+        final String hostTCP = "localhost";
+        final int portTCP = Integer.parseInt(args[0]);
+        final int portUDP = Integer.parseInt(args[1]);
+
+        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
+        new Thread(appClient).start();
+    }
+
     @Override
     void abo(String host, int port) throws IOException {
         SponsorHandler sponsorHandler = new SponsorHandler(host, port);
         sponsorHandlers.add(sponsorHandler);
         new Thread(sponsorHandler).start();
+        System.out.println("Vous etes maintenant abonné à #" + host + ":" + port + "");
     }
 
     @Override
@@ -33,6 +42,8 @@ public class AppClient extends AppClientAbstract {
         String type = messageProcessor.getType();
         switch (type) {
             case "WELCO":
+                this.id = id;
+                this.port = port;
                 System.out.println("vous etes bien inscrit");
                 break;
             case "GOBYE":
@@ -50,6 +61,7 @@ public class AppClient extends AppClientAbstract {
         String type = messageProcessor.getType();
         switch (type) {
             case "HELLO":
+                this.id = id;
                 System.out.println("vous etes bien connecté");
                 break;
             case "GOBYE":
@@ -149,19 +161,19 @@ public class AppClient extends AppClientAbstract {
                 String ipDiff = messageProcessor.getIpDiff();
                 int port = messageProcessor.getPort();
                 String mess = messageProcessor.getMess();
-                System.out.println("(" + ipDiff + ":" + port + ")publ: " + mess);
+                System.out.println("#" + ipDiff + ":" + port + " publ: " + mess);
                 break;
             }
             case "EIRF>": {
                 String id = messageProcessor.getId();
-                System.out.println("# " + id + " vous demande en ami");
-                String input = termScanner.askNext("Voulez vous accepté sa demande(oui ou non):", "^(oui|non)$");
-                switch (input) {
-                    case "oui": {
+                System.out.println("@" + id + " vous demande en ami");
+                String input = termScanner.askNext("Voulez vous accepté sa demande?\n0:\tnon\n1:\toui", "^(0|1)$");
+                switch (input.charAt(0)) {
+                    case '1': {
                         daSo.send(new MessageProcessor("OKIRF").build());
                         break;
                     }
-                    case "non": {
+                    case '0': {
                         daSo.send(new MessageProcessor("NOKFR").build());
                         break;
                     }
@@ -174,12 +186,12 @@ public class AppClient extends AppClientAbstract {
             }
             case "FRIEN": {
                 String id = messageProcessor.getId();
-                System.out.println("# " + id + "a accepté votre demande d'ami");
+                System.out.println("@" + id + " a accepté votre demande d'ami");
                 break;
             }
             case "NOFRI": {
                 String id = messageProcessor.getId();
-                System.err.println("# " + id + "a refusé votre demande d'ami");
+                System.err.println("@" + id + " a refusé votre demande d'ami");
                 break;
             }
         }
@@ -216,19 +228,5 @@ public class AppClient extends AppClientAbstract {
             System.out.println("Vous etes deconnectes du serveur");
             stop();
         }
-    }
-
-
-    public static void main(String args[]) throws IOException {
-        if (args.length != 2) {
-            System.err.println("Usage: need 2 arguments <portTCP> <portUDP>");
-            return;
-        }
-        final String hostTCP = "localhost";
-        final int portTCP = Integer.parseInt(args[0]);
-        final int portUDP = Integer.parseInt(args[1]);
-
-        AppClient appClient = new AppClient(hostTCP, portTCP, portUDP);
-        new Thread(appClient).start();
     }
 }

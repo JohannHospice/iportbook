@@ -3,7 +3,10 @@ package com.iportbook.core.tools.net;
 import com.iportbook.core.tools.processor.NotificationProcessor;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -17,10 +20,6 @@ public class DatagramSocketReceiver {
 
     public DatagramSocketReceiver(int sourcePort) throws UnknownHostException, SocketException {
         this.dso = new DatagramSocket(sourcePort);
-    }
-
-    public void bind(int sourcePort) throws SocketException {
-        dso.bind(new InetSocketAddress(sourcePort));
     }
 
     public int getLocalPort() {
