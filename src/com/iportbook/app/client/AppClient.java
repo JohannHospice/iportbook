@@ -167,19 +167,62 @@ public class AppClient extends ApplicationListener implements ClientAction {
     //TODO
     @Override
     public void consu() throws Exception {
-
+    	daSo.send(new MessageProcessor("CONSU").build());
+    	
+    	MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+    	String type = messageProcessor.getType();
+    	switch(type) {
+    	case "NOCON":
+    		System.out.println("Pas de notification recu");
+    		break;
+    	case "SSEM":
+    		System.out.println("Message recu");
+    		break;
+    	case "OOLF":
+    		System.out.println("Message d'inondation recu");
+    		break;
+    	case "EIRF":
+    		System.out.println("Demande d'ami recu");
+    		break;
+    	case "FRIEN":
+    		System.out.println("Demande d'ami accepte");
+    		break;
+    	case "NOFRI":
+    		System.out.println("Demande d'ami refusee");
+    		break;
+    	case "LPUB":
+    		System.out.println("Publicite recu");
+    		break;
+    	default:
+    		System.out.println("Fatal Error Consu");
+    	}
     }
 
     //TODO
     @Override
     public void list() throws Exception {
+    	daSo.send(new MessageProcessor("LIST?").build());
 
+        MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+        String type = messageProcessor.getType();
+        if(type == "RLIST") {
+        	while (messageProcessor.getId() != null) {
+        		System.out.println(messageProcessor.getId());
+        	}
+        }
     }
 
     //TODO
     @Override
     public void iquit() throws Exception {
+    	daSo.send(new MessageProcessor("IQUIT").build());
 
+        MessageProcessor messageProcessor = new MessageProcessor(daSo.read());
+        String type = messageProcessor.getType();
+        if (type == "GOBYE") {
+        	System.out.println("Vous etes deconnectes du serveur");
+        	stop();
+        }
     }
 
     public static void main(String args[]) throws IOException {
