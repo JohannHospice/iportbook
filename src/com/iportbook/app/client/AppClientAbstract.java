@@ -56,6 +56,7 @@ public abstract class AppClientAbstract extends ApplicationListener {
                         break;
                     }
                 }
+                notificationHandler.setId(id);
                 help();
             } catch (Exception e) {
                 stop();

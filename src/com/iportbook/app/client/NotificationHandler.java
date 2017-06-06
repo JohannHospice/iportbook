@@ -10,6 +10,7 @@ import java.io.IOException;
 public class NotificationHandler extends ApplicationListener {
     private final DatagramSocketReceiver datagramSocketReceiver;
     private int port;
+    private String id ="";
 
     public NotificationHandler(int port) throws IOException {
         datagramSocketReceiver = new DatagramSocketReceiver(port);
@@ -49,7 +50,7 @@ public class NotificationHandler extends ApplicationListener {
                     builder.append("Publicite");
                     break;
             }
-            builder.append("\n> ");
+            builder.append("\n").append(id).append("> ");
             System.out.print(builder.toString());
         } catch (Exception ignored) {
         }
@@ -68,5 +69,9 @@ public class NotificationHandler extends ApplicationListener {
 
     public int getPort() {
         return port;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

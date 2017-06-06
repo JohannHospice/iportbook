@@ -21,6 +21,8 @@ public abstract class ClientHandlerAbstract extends ApplicationListener {
     protected void onStart() {
         try {
             MessageProcessor message = daSo.readMessageProcessor();
+            if (ClientManager.getInstance().getClientSize() >= ClientManager.MAX_CLI_HANDLER)
+                throw new Exception();
             String type = message.getType();
             String id = message.getId();
             switch (type) {

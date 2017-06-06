@@ -16,6 +16,7 @@ public class ClientManager {
     private static ClientManager self = null;
     private ArrayList<Client> clients = new ArrayList<>();
     private ArrayList<ClientHandlerAbstract> cliHandlers = new ArrayList<>();
+    static final int MAX_CLI_HANDLER = 100;
 
     private ClientManager() {
     }
